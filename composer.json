@@ -1,0 +1,9 @@
+{
+    "name": "pullay/query",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Pullay\\Database\\": "src/"
+        }
+    }
+}
