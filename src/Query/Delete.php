@@ -2,16 +2,19 @@
 
 namespace Pullay\Database\Query;
 
-class Delete extends AbstractQuery
+use function sprintf;
+
+class Delete implements Query
 {
     use Traits\WhereTrait;
 
     protected Connection $connection;
     protected string $tableName = '';
+    protected array $values = [];
 
     public function __construct(Connection $connection, ?string $tableName = null)
     {
-        parent::__construct($connection);
+        $this->connection = $connection;
 
         if ($tableName) {
             $this->from($tableName);
@@ -31,7 +34,7 @@ class Delete extends AbstractQuery
 
     public function getValues(): array
     {
-        return $this->getWhereParameters();
+        return $this->values;
     }
 
     public function getSql(): string
@@ -39,5 +42,16 @@ class Delete extends AbstractQuery
         $sql = sprintf('DELETE FROM %1$s', $this->tableName);
         $sql .= $this->getClauseWhere();
         return $sql;
+    }
+
+    public function execute(): PDOStatement
+    {
+        $this->values = [];
+        return $this->connection->executeStatement($this);
+    }
+
+    public function __toString(): string
+    {
+        return $this->getSql();
     }
 }

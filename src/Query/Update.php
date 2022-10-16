@@ -4,7 +4,11 @@ namespace Pullay\Database\Query;
 
 use Pullay\Database\Connection;
 
-class Update extends AbstractQuery
+use function array_keys;
+use function implode;
+use function sprintf;
+
+class Update implements Query
 {
     use Traits\WhereTrait;
     use Traits\LimitTrait;
@@ -15,7 +19,7 @@ class Update extends AbstractQuery
 
     public function __construct(Connection $connection, ?string $tableName = null)
     {
-        parent::__construct($connection);
+        $this->connection = $connection;
 
         if ($tableName) {
             $this->table($tableName);
@@ -47,15 +51,26 @@ class Update extends AbstractQuery
     public function getSql(): string
     {
         $columns = array_keys($this->values);
-        $columnsQuery = [];
+        $rowPlaceholder = [];
 
         foreach ($columns as $column) {
-            $columnsQuery[] = sprintf(" %s = :%s", $column, $column);
+            $rowPlaceholder[] = sprintf(" %s = :%s", $column, $column);
         }
 
-        $sql = sprintf('UPDATE %1$s SET %2$s', $this->tableName, implode(', ', $columnsQuery));
+        $sql = sprintf('UPDATE %1$s SET %2$s', $this->tableName, implode(', ', $rowPlaceholder));
         $sql .= $this->getClauseWhere();
         $sql .= $this->getClauseLimit();
         return $sql;
+    }
+
+    public function execute(): PDOStatement
+    {
+        $this->values = [];
+        return $this->connection->executeStatement($this);
+    }
+
+    public function __toString(): string
+    {
+        return $this->getSql();
     }
 }

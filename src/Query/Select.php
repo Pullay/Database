@@ -3,10 +3,17 @@
 namespace Pullay\Database\Query;
 
 use Pullay\Database\Connection;
+use PDOStatement;
 use Countable;
 use IteratorAggregate;
 
-class Select extends AbstractQuery implements Countable, IteratorAggregate
+use function count;
+use function implode;
+use function is_array;
+use function is_string;
+use function sprintf;
+
+class Select implements Query, Countable, IteratorAggregate
 {
     use Traits\WhereTrait;
     use Traits\LimitTrait;
@@ -24,7 +31,7 @@ class Select extends AbstractQuery implements Countable, IteratorAggregate
 
     public function __construct(Connection $connection, ?string $tableName = null, $columns = null)
     {
-        parent::__construct($connection);
+        $this->connection = $connection;
 
         if ($columns) {
             $this->select($columns);
@@ -101,32 +108,23 @@ class Select extends AbstractQuery implements Countable, IteratorAggregate
 
     public function getSql(): string
     {
-        $columns = implode(', ', $this->columns);
-
-        if (count($this->columns) === 0) {
-            $columns = '*';
-        }
+        $columns = (count($this->columns) > 0) ? implode(', ', $this->columns) : '*';
 
         $sql = sprintf('SELECT %1$s FROM %2$s', $columns, $this->tableName);
         $sql .= $this->getClauseWhere();
         $sql .= $this->getClauseGroupBy();
         $sql .= $this->getClauseSort();
         $sql .= $this->getClauseLimit();
-        $sql .= $this->getClauseOffset();
         return $sql;
     }
 
-    public function reset(): self
+    public function execute(): PDOStatement
     {
-        $this->columns = [];
-        $this->tableName = '';
-        $this->group = [];
-        $this->sort = null;
-        $this->order = null;
-        return $this;
+        $this->values = [];
+        return $this->connection->executeStatement($this);
     }
 
-    public function fetch(): ?array
+    public function fetchOne(): ?array
     {
         return ($row = $this->execute()->fetch()) ? $row : null;
     }
@@ -151,6 +149,11 @@ class Select extends AbstractQuery implements Countable, IteratorAggregate
         return new ArrayIterator($this->fetchAll());
     }
 
+    public function __toString(): string
+    {
+        return $this->getSql();
+    }
+
     protected function getClauseGroupBy(): string
     {
         return (!empty($this->group) ? sprintf(' GROUP BY %1$s', implode(',', $this->group)) : '');
@@ -159,10 +162,5 @@ class Select extends AbstractQuery implements Countable, IteratorAggregate
     protected function getClauseSort(): string
     {
         return (!empty($this->sort) ? sprintf(' ORDER BY %1$s %2$s', $this->sort, $this->order) : '');
-    }
-
-    protected function getClauseOffset(): string
-    {
-        return (!empty($this->offset) ? sprintf(' OFFSET %1$s', $this->offset) : '');
     }
 }

@@ -8,6 +8,13 @@ use PDOStatement;
 use Pullay\Database\Query\Query;
 use Throwable;
 
+use function array_fill;
+use function array_keys;
+use function array_values;
+use function count;
+use function implode;
+use function sprintf;
+
 class Connection
 {
     protected Pdo $pdo;
@@ -44,12 +51,11 @@ class Connection
         return new QueryBuilder($this);
     }
 
-    public function insertInto(string $tableName, array $values): void
+    public function batchInsert(string $tableName, array $values): void
     {
-        $this->getQueryBuilder()
-            ->insert($tableName)
-            ->values($values)
-            ->execute();
+        $rowPlaceholder = array_fill(0, count($values), '?');
+        $rawQuery = sprintf('INSERT INTO %1$s (%2$s) VALUES (%3$s)', $tableName, implode(', ', array_keys($values)), implode(', ', $rowPlaceholder));
+        $this->executeSql($rawQuery, array_values($values));
     }
 
     public function executeSql(string $sql, array $values = []): PDOStatement
@@ -59,7 +65,7 @@ class Connection
         return $stmt;
     }
 
-    public function executeQuery(Query $query): PDOStatement
+    public function executeStatement(Query $query): PDOStatement
     {
          return $this->executeSql($query->getSql(), $query->getValues());
     }
@@ -87,16 +93,18 @@ class Connection
         return $this->pdo->rollBack();
     }
 
-    public function transaction(callable $callback): void
+    public function transaction(callable $callback)
     {
          $this->beginTransaction();
 
          try {
-             $callback($this);
+             $result = $callback($this);
              $this->commit();
          } catch (Throwable $e) {
              $this->rollback();
              throw $e;
          }
+         
+         return $result;
     }
 }

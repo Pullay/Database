@@ -2,6 +2,8 @@
 
 namespace Pullay\Database\Query\Traits;
 
+use function sprintf;
+
 trait LimitTrait
 {
     protected ?int $numberRows = null;
@@ -26,9 +28,16 @@ trait LimitTrait
 
     protected function getClauseLimit(): string
     {
-        return (!empty($this->numberRows) ? sprintf(
-             ' LIMIT %1$s %2$s', $this->numberRows, 
-             (!empty($this->offsetValue) ? sprintf(' OFFSET %1$s', $this->offsetValue) : '')
-        ) : '');
+        $sql = '';
+
+        if (!empty($this->numberRows)) {
+            $sql = sprintf(' LIMIT %1$s', $this->numberRows);
+
+            if (!empty($this->offsetValue)) {
+                $sql =  sprintf(' LIMIT %1$s OFFSET %2$s', $this->numberRows, $this->offsetValue);
+            }
+        }
+
+        return $sql;
     }
 }

@@ -16,6 +16,11 @@ class QueryBuilder
          $this->connection = $connection;
     }
 
+    public function getConnection(): Connection
+    {
+         return $this->connection;
+    }
+
     public function insert(?string $tableName = null): Insert
     {
         return new Insert($this->connection, $tableName);

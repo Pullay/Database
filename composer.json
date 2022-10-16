@@ -1,6 +1,13 @@
 {
-    "name": "pullay/query",
-    "require": {},
+    "name": "pullay/database",
+    "description": "Lite query builder for PHP",
+    "type": "library",
+    "keywords": ["database", "query", "builder", "pdo"],
+    "license": "MIT",
+    "require": {
+        "php": ">=7.1", 
+        "ext-pdo": "*"
+    },
     "autoload": {
         "psr-4": {
             "Pullay\\Database\\": "src/"

@@ -4,13 +4,17 @@ namespace Pullay\Database\Query\Traits;
 
 use Pullay\Database\Query\Predicate\Expression;
 
+use function is_array;
+use function sprintf;
+use function strtoupper;
+
 trait WhereTrait
 {
      protected array $whereConditions = [];
      protected array $values = [];
 
     /**
-     * @param string|array $condition
+     * @param Expression|string|array $condition
      */
      public function where($condition, array $parameters = []): self
      {
@@ -36,7 +40,7 @@ trait WhereTrait
      }
 
     /**
-     * @param string|array $condition
+     * @param Expression|string|array $condition
      */
     public function andWhere($condition, array $parameters): self
     {
@@ -44,7 +48,7 @@ trait WhereTrait
     }
 
     /**
-     * @param string|array $condition
+     * @param Expression|string|array $condition
      */
     public function orWhere($condition, array $parameters = []): self
     {
@@ -64,9 +68,9 @@ trait WhereTrait
          return $this->whereConditions;
     }
 
-    protected function addWhereConditions(string $condition, array $parameters, string $separator): void
+    protected function addWhereConditions(string $condition, array $parameters, string $statement): void
     {
-        $this->whereConditions[] = [$condition, $parameters, $separator];
+        $this->whereConditions[] = [$condition, $parameters, $statement];
     }
 
     protected function getClauseWhere(): string
@@ -77,9 +81,9 @@ trait WhereTrait
             $i = 0;
 
             foreach ($this->whereConditions as $whereCondition) {
-                [$condition, $parameters, $separator] = $whereCondition;
+                [$condition, $parameters, $statement] = $whereCondition;
                 $this->values += $parameters;
-                $clause = ($i === 0 ? 'WHERE': strtoupper($separator));
+                $clause = ($i === 0 ? 'WHERE': strtoupper($statement));
                 $sql .= sprintf(" %s %s", $clause, $condition);
                 $i++;
             }
