@@ -1,7 +1,7 @@
 Pullay Database
 ===============
 
-Lite query builder for PHP
+Lite Query Builder for PHP
 
 ## Installation
 

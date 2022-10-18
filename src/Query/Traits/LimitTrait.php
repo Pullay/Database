@@ -16,14 +16,40 @@ trait LimitTrait
         return $this;
     }
 
+    public function take(int $numberRows): self
+    {
+        return $this->limit($numberRows);
+    }
+
     public function getNumberRows(): ?int
     {
         return $this->numberRows;
     }
 
+    public function getTake(): ?int
+    {
+        return $this->getNumberRows();
+    }
+
+    public function offset(int $offsetValue): self
+    {
+        $this->offsetValue = $offsetValue;
+        return $this;
+    }
+
+    public function skip(int $offsetValue): self
+    {
+        return $this->offset($offsetValue);
+    }
+
     public function getOffsetValue(): ?int
     {
         return $this->offsetValue;
+    }
+
+    public function getSkip(): ?int
+    {
+        return $this->getOffsetValue();
     }
 
     protected function getClauseLimit(): string

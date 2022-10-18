@@ -42,7 +42,7 @@ trait WhereTrait
     /**
      * @param Expression|string|array $condition
      */
-    public function andWhere($condition, array $parameters): self
+    public function andWhere($condition, array $parameters = []): self
     {
          return $this->where($condition, $parameters, 'AND');
     }

@@ -3,7 +3,7 @@
     "description": "Lite query builder for PHP",
     "type": "library",
     "keywords": ["database", "query", "builder", "pdo"],
-    "license": "MIT",
+    "license": "mit",
     "require": {
         "php": ">=7.1", 
         "ext-pdo": "*"
