@@ -44,10 +44,10 @@ class Delete implements Query
         return $sql;
     }
 
-    public function execute(): PDOStatement
+    public function execute(): void
     {
+        $this->connection->executeStatement($this);
         $this->values = [];
-        return $this->connection->executeStatement($this);
     }
 
     public function __toString(): string

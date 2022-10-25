@@ -3,6 +3,9 @@ Pullay Database
 
 Lite Query Builder for PHP
 
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
+(https://packagist.org/packages/pullay/database)
+
 ## Installation
 
 ```
