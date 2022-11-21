@@ -27,4 +27,9 @@ class Like implements Expression
      {
          return sprintf('%1$s LIKE %2$s', $this->column, $this->pattern);
      }
+
+     public function __toString(): string
+     {
+          return $this->getExpression();
+     }
 }

@@ -9,3 +9,4 @@ class IsNotNull extends IsNull
          return sprintf('%1$s IS NOT NULL', $this->getColumn());
      }
 }
+

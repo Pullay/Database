@@ -2,6 +2,8 @@
 
 namespace Pullay\Database\Query;
 
+use Pullay\Database\Connection;
+
 use function sprintf;
 
 class Delete implements Query

@@ -37,9 +37,18 @@ class Update implements Query
         return $this->tableName;
     }
 
-    public function set(array $values): self
+    public function sets(array $values): self
     {
         $this->values += $values;
+        return $this;
+    }
+
+    /**
+     * @param mixed $value
+     */
+    public function set(string $column, $value): self
+    {
+        $this->values[$column] = $value;
         return $this;
     }
 

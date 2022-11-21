@@ -34,4 +34,9 @@ class Between implements Expression
      {
          return sprintf('%1$s BETWEEN %2$s AND %3$s', $this->column, $this->start, $this->end);
      }
+
+     public function __toString(): string
+     {
+          return $this->getExpression();
+     }
 }

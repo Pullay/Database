@@ -43,6 +43,15 @@ class Insert implements Query
         return $this;
     }
 
+    /**
+     * @param mixed $value
+     */
+    public function set(string $column, $value): self
+    {
+        $this->values[$column] = $value;
+        return $this;
+    }
+
     public function getValues(): array
     {
         return array_values($this->values);

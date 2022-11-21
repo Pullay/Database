@@ -20,4 +20,9 @@ class IsNull implements Expression
      {
          return sprintf('%1$s IS NULL', $this->column);
      }
+
+     public function __toString(): string
+     {
+          return $this->getExpression();
+     }
 }

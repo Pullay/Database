@@ -17,4 +17,9 @@ class In implements Expression
      {
          return sprintf('%1$s IN (%2$s)', $this->column, implode(',', $this->sets));
      }
+
+     public function __toString(): string
+     {
+          return $this->getExpression();
+     }
 }

@@ -20,4 +20,9 @@ class Exits implements Expression
      {
          return sprintf('EXIST %1$s', $this->subQuery);
      }
+
+     public function __toString(): string
+     {
+          return $this->getExpression();
+     }
 }

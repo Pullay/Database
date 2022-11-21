@@ -44,7 +44,7 @@ $connection->getLastInsertId(); // 1
 ```
 $query = $connection->getQueryBuilder()
     ->update('user')
-    ->set(['password' => '123456'])
+    ->sets(['password' => '123456'])
     ->where('id = :id', ['id' => 1])
     ->execute();
 $query->getSql(); // UPDATE user SET password = :password WHERE id = :id

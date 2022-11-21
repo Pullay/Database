@@ -32,9 +32,19 @@ class Operator implements Expression
          return new self($left, $right, self::EQUAL_TO);
      }
 
+     public static function eq(string $left, string $right): self
+     {
+         return new self($left, $right, self::EQ);
+     }
+
      public static function notEqualTo(string $left, string $right): self
      {
          return new self($left, $right, self::NOT_EQUAL_TO);
+     }
+
+     public static function neq(string $left, string $right): self
+     {
+         return new self($left, $right, self::NEQ);
      }
 
      public static function lessThen(string $left, string $right): self
@@ -42,9 +52,19 @@ class Operator implements Expression
          return new self($left, $right, self::LEES_THAN);
      }
 
+     public static function lt(string $left, string $right): self
+     {
+         return new self($left, $right, self::LT);
+     }
+
      public static function greaterThan(string $left, string $right): self
      {
          return new self($left, $right, self::GREATER_THAN);
+     }
+
+     public static function gt(string $left, string $right): self
+     {
+         return new self($left, $right, self::GT);
      }
 
      public static function lessThenOrEqualTo(string $left, string $right): self
@@ -52,9 +72,19 @@ class Operator implements Expression
          return new self($left, $right, self::LEES_THAN_OR_EQUAL_TO);
      }
 
+     public static function lte(string $left, string $right): self
+     {
+         return new self($left, $right, self::LTE);
+     }
+
      public static function greaterThanOrEqualTo(string $left, string $right): self
      {
          return new self($left, $right, self::GREATER_THAN_OR_EQUAL_TO);
+     }
+
+     public static function gte(string $left, string $right): self
+     {
+         return new self($left, $right, self::GTE);
      }
 
      public function getLeft(): string
@@ -75,5 +105,10 @@ class Operator implements Expression
      public function getExpression(): string
      {
          return sprintf('%1$s %2$s %3$s', $this->left, $this->operator, $this->right);
+     }
+
+     public function __toString(): string
+     {
+          return $this->getExpression();
      }
 }
