@@ -2,7 +2,7 @@
 
 namespace Pullay\Database\Query;
 
-interface Query
+interface QueryInterface
 {
     public function getValues(): array;
     public function getSql(): string;

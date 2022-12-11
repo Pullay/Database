@@ -4,14 +4,14 @@ namespace Pullay\Database\Query;
 
 use Pullay\Database\Connection;
 
-use function sprintf;
+use function strtoupper;
 
-class Delete implements Query
+class Delete extends BaseQuery
 {
-    use Traits\WhereTrait;
+    use WhereTrait;
+    use LimitTrait;
 
     protected Connection $connection;
-    protected string $tableName = '';
     protected array $values = [];
 
     public function __construct(Connection $connection, ?string $tableName = null)
@@ -25,13 +25,8 @@ class Delete implements Query
 
     public function from(string $tableName): self
     {
-        $this->tableName = $tableName;
+        $this->setTableName($tableName);
         return $this;
-    }
-
-    public function getTableName(): string
-    {
-        return $this->tableName;
     }
 
     public function getValues(): array
@@ -42,18 +37,38 @@ class Delete implements Query
     public function getSql(): string
     {
         $sql = sprintf('DELETE FROM %1$s', $this->tableName);
-        $sql .= $this->getClauseWhere();
+
+        if (!empty($this->getWhereConditions())) {
+           $i = 0;
+
+           foreach($this->getWhereConditions() as $whereCondition) {
+               [$condition, $parameters, $statement] = $whereCondition;
+               $this->values += $parameters;
+               $clause = ($i === 0 ? 'WHERE': strtoupper($statement));
+               $sql .= sprintf(" %s %s", $clause, $condition);
+               $i++;
+           }
+        }
+
+        if (!empty($this->getNumberRows())) {
+            $sql .= sprintf(' LIMIT %1$s', $this->getNumberRows());
+
+            if (!empty($this->getOffsetValue())) {
+                $sql =  sprintf(' LIMIT %1$s OFFSET %2$s', $this->getNumberRows(), $this->getOffsetValue());
+            }
+        }
+
         return $sql;
     }
 
     public function execute(): void
     {
-        $this->connection->executeStatement($this);
-        $this->values = [];
-    }
+        $this->connection
+           ->setQueryStatement($this)
+           ->execute();
 
-    public function __toString(): string
-    {
-        return $this->getSql();
+        $this->tableName = '';
+        $this->values = [];
+        $this->whereConditions = [];
     }
 }

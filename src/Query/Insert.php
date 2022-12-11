@@ -7,14 +7,10 @@ use Pullay\Database\Connection;
 use function array_fill;
 use function array_keys;
 use function array_values;
-use function count;
-use function implode;
-use function sprintf;
 
-class Insert implements Query
+class Insert extends BaseQuery
 {
     protected Connection $connection;
-    protected string $tableName = '';
     protected array $values = [];
 
     public function __construct(Connection $connection, ?string $tableName = null)
@@ -28,18 +24,13 @@ class Insert implements Query
 
     public function into(string $tableName): self
     {
-        $this->tableName = $tableName;
+        $this->setTableName($tableName);
         return $this;
-    }
-
-    public function getTableName(): string
-    {
-        return $this->tableName;
     }
 
     public function values(array $values): self
     {
-        $this->values = $values;
+        $this->values += $values;
         return $this;
     }
 
@@ -64,14 +55,16 @@ class Insert implements Query
         return $sql;
     }
 
-    public function execute(): void
+    public function execute(): ?int
     {
-        $this->connection->executeStatement($this);
-        $this->values = [];
-    }
+        $driver = $this->connection
+           ->setQueryStatement($this)
+           ->execute();
 
-    public function __toString(): string
-    {
-        return $this->getSql();
+        $this->tableName = '';
+        $this->values = [];
+
+        $insertId = $driver->lastInsertedId();
+        return ($insertId !== false) ? $insertId : null;
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Pullay\Database\Query\Predicate;
 
-class IsNull implements Expression
+class IsNull extends BaseExpression
 {
      protected string $column;
 
@@ -19,10 +19,5 @@ class IsNull implements Expression
      public function getExpression(): string
      {
          return sprintf('%1$s IS NULL', $this->column);
-     }
-
-     public function __toString(): string
-     {
-          return $this->getExpression();
      }
 }

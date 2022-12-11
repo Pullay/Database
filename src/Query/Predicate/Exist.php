@@ -2,7 +2,7 @@
 
 namespace Pullay\Database\Query\Predicate;
 
-class Exits implements Expression
+class Exits extends BaseExpression
 {
      protected string $subQuery; 
 
@@ -19,10 +19,5 @@ class Exits implements Expression
      public function getExpression(): string
      {
          return sprintf('EXIST %1$s', $this->subQuery);
-     }
-
-     public function __toString(): string
-     {
-          return $this->getExpression();
      }
 }

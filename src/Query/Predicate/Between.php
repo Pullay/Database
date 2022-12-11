@@ -2,7 +2,7 @@
 
 namespace Pullay\Database\Query\Predicate;
 
-class Between implements Expression
+class Between extends BaseExpression
 {
      protected string $column;
      protected int $start;
@@ -33,10 +33,5 @@ class Between implements Expression
      public function getExpression(): string
      {
          return sprintf('%1$s BETWEEN %2$s AND %3$s', $this->column, $this->start, $this->end);
-     }
-
-     public function __toString(): string
-     {
-          return $this->getExpression();
      }
 }
