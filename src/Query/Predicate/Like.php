@@ -2,7 +2,7 @@
 
 namespace Pullay\Database\Query\Predicate;
 
-class Like implements Expression
+class Like extends BaseExpression
 {
      protected string $column;
      protected string $pattern;
@@ -26,10 +26,5 @@ class Like implements Expression
      public function getExpression(): string
      {
          return sprintf('%1$s LIKE %2$s', $this->column, $this->pattern);
-     }
-
-     public function __toString(): string
-     {
-          return $this->getExpression();
      }
 }

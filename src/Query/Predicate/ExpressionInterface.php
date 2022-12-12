@@ -2,7 +2,7 @@
 
 namespace Pullay\Database\Query\Predicate;
 
-interface Expression
+interface ExpressionInterface
 {
     public function getExpression(): string;
 }

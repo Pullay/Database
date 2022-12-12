@@ -16,46 +16,82 @@ composer require pullay/database dev-master
 
 ```
 
+use Pullay\Database\Driver\PdoMysql;
 use Pullay\Database\Connection;
 
-$pdo = new PDO('mysql:dbname=test', 'user', 'password');
-$connection = new Connection($pdo);
-$query = $connection->getQueryBuilder()
-    ->select('user')
-    ->where('id = :id', ['id' => 1])
-    ->limit(1);
-$query->getSql(); // SELECT * FROM user WHERE id = :id LIMIT 1
-$query->fetchOne(); // ["id" => 1, "username" => 'user', 'password']
+$driver = PdoMysql::connection('localhost', 'test', 'user', 'password');
+$connection = new Connection($driver);
+$lastInsertId = $connection->batchInsert('user', ['username' => 'user', 'password' => 'password']);
 ```
 
 ## Insert
 
 ```
-$query = $connection->getQueryBuilder()
+$lastInsertId = $connection->getQueryBuilder()
     ->insert('user')
     ->values(['username' => 'user', 'password' => 'password'])
     ->execute();
-$query->getSql(); // INSERT INTO user (username,password) VALUES (?,?)
-$connection->getLastInsertId(); // 1
+
+$query->set('username', 'user')
+    ->set('password', 'password');
+```
+
+## Select
+
+```
+$row = $connection->getQueryBuilder()
+    ->select('user')
+    ->where('id = :id', ['id' => 1])
+    ->limit(1)
+    ->fetchOne();
+
+$query = $connection->getQueryBuilder()
+    ->select('user');
+
+$rows = $query->fetchAll();
+
+foreach ($query as $row) {
+    echo $row['username'];
+}
+
+```
+
+## Where conditions
+
+```
+
+$query->where('id = :id', ['id' => 1]);
+
+$query->where('id = :id', ['id' => 1])
+    ->andWhere('username = :username', ['username' => 'user']);
+
+$query->where(['id = :id' => ['id' => 1], 'username = :username' => ['username' => 'user']]);
+```
+
+```
+
+use Pullay\Database\Query\Predicate\Comparison
+
+$query->where(Comparison::equalTo('id', ':id'), ['id' => 1]);
 ```
 
 ## Update
 
 ```
-$query = $connection->getQueryBuilder()
+$connection->getQueryBuilder()
     ->update('user')
     ->sets(['password' => '123456'])
     ->where('id = :id', ['id' => 1])
     ->execute();
-$query->getSql(); // UPDATE user SET password = :password WHERE id = :id
+
+$query->set('password', '123456');
 ```
 
 ## Delete
 
 ```
-$query = $connection->getQueryBuilder()
+$connection->getQueryBuilder()
     ->delete('user')
     ->where('id = :id', ['id' => 1])
     ->execute();
-$query->getSql(); // DELETE FROM user WHERE id = :id
 ```

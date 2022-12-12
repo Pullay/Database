@@ -1,17 +1,14 @@
 <?php
 
-namespace Pullay\Database\Query\Traits;
+namespace Pullay\Database\Query;
 
-use Pullay\Database\Query\Predicate\Expression;
+use Pullay\Database\Query\Predicate\ExpressionInterface;
 
 use function is_array;
-use function sprintf;
-use function strtoupper;
 
 trait WhereTrait
 {
-     protected array $whereConditions = [];
-     protected array $values = [];
+    protected array $whereConditions = [];
 
     /**
      * @param Expression|string|array $condition
@@ -22,9 +19,9 @@ trait WhereTrait
             return $this;
         }
 
-        if ($condition instanceOf Expression) {
-            $this->where($condition->getExpression(), []);
-            return $this;
+        if ($condition instanceOf ExpressionInterface) {
+             $this->where($condition->getExpression(), $parameters);
+             return $this;
         }
 
         if (is_array($condition)) {
@@ -40,7 +37,7 @@ trait WhereTrait
      }
 
     /**
-     * @param Expression|string|array $condition
+     * @param string|array $condition
      */
     public function andWhere($condition, array $parameters = []): self
     {
@@ -48,7 +45,7 @@ trait WhereTrait
     }
 
     /**
-     * @param Expression|string|array $condition
+     * @param string|array $condition
      */
     public function orWhere($condition, array $parameters = []): self
     {
@@ -71,24 +68,5 @@ trait WhereTrait
     protected function addWhereConditions(string $condition, array $parameters, string $statement): void
     {
         $this->whereConditions[] = [$condition, $parameters, $statement];
-    }
-
-    protected function getClauseWhere(): string
-    {
-        $sql = '';
-
-        if (!empty($this->whereConditions)) {
-            $i = 0;
-
-            foreach ($this->whereConditions as $whereCondition) {
-                [$condition, $parameters, $statement] = $whereCondition;
-                $this->values += $parameters;
-                $clause = ($i === 0 ? 'WHERE': strtoupper($statement));
-                $sql .= sprintf(" %s %s", $clause, $condition);
-                $i++;
-            }
-        }
-
-        return $sql;
     }
 }

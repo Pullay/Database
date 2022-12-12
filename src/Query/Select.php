@@ -3,34 +3,30 @@
 namespace Pullay\Database\Query;
 
 use Pullay\Database\Connection;
-use PDOStatement;
 use Countable;
 use IteratorAggregate;
+use Traversable;
 
-use function count;
-use function implode;
 use function is_array;
 use function is_string;
-use function sprintf;
 use function strtoupper;
 
-class Select implements Query, Countable, IteratorAggregate
+class Select extends BaseQuery implements Countable, IteratorAggregate
 {
-    use Traits\WhereTrait;
-    use Traits\LimitTrait;
+    use JoinTrait;
+    use WhereTrait;
+    use LimitTrait;
 
-    public const ASC = 'ASC';
-    public const DESC = 'DESC';
+    public const ORDER_ASC     = 'ASC';
+    public const ORDER_DESC    = 'DESC';
 
-    protected Connection $connection;
+    protected bool $distinct = false;
     protected array $columns = [];
-    protected string $tableName = '';
-    protected bool $isDistinct = false;
-    protected ?string $union = null;
     protected array $values = [];
-    protected array $group = [];
-    protected ?string $sort;
-    protected ?string $order;
+    protected array $groupBy = [];
+    protected ?string $having = null;
+    protected ?string $sort = null;
+    protected ?string $order = null;
 
     public function __construct(Connection $connection, ?string $tableName = null, $columns = null)
     {
@@ -43,6 +39,17 @@ class Select implements Query, Countable, IteratorAggregate
         if ($tableName) {
             $this->from($tableName);
         }
+    }
+
+    public function distinct(): self
+    {
+        $this->distinct = true;
+        return $this;
+    }
+
+    public function isDistinct(): bool
+    {
+        return $this->distinct;
     }
 
     /**
@@ -64,71 +71,38 @@ class Select implements Query, Countable, IteratorAggregate
         return $this->columns;
     }
 
-    public function distinct(): self
-    {
-        $this->isDistinct = true;
-        return $this;
-    }
-
-    public function isDistinct(): bool
-    {
-        return $this->isDistinct;
-    }
-
     public function from(string $tableName): self
     {
-        $this->tableName = $tableName;
+        $this->setTableName($tableName);
         return $this;
     }
 
-    public function getTableName(): string
+    public function groupBy(array $columns): self
     {
-        return $this->tableName;
-    }
-
-    /**
-     * @param Query|string $query
-     *
-     * @since 1.2
-     */
-    public function union($query): self
-    {
-        if ($query instanceOf Query) {
-            $this->union = $query->getSql();
-            return $this;
-        }
-
-        $this->union = $query;
-        return $this;
-    }
-
-    public function getUnion(): ?string
-    {
-        return $this->union;
-    }
-
-    /**
-     * @param string string|array $group
-     */
-    public function groupBy($group): self
-    {
-        if (is_array($group)) {
-            $this->group += $group;
-        } else {
-            $this->group[] = $group;
-        }
+        $this->groupBy = $columns;
         return $this;
     }
 
     public function getGroupBy(): array
     {
-        return $this->group;
+        return $this->groupBy;
+    }
+
+    public function having(string $condition): self
+    {
+        $this->having = $condition;
+        return $this;
+    }
+
+    public function getHaving(): ?string
+    {
+        return $this->having;
     }
 
     public function orderBy(string $sort, ?string $order = null): self
     {
         $this->sort = $sort;
-        $this->order = $order??self::ASC;
+        $this->order = $order;
         return $this;
     }
 
@@ -137,77 +111,105 @@ class Select implements Query, Countable, IteratorAggregate
         return $this->sort;
     }
 
-    public function getOrderBy(): ?string
+    public function getOrder(): ?string
     {
         return $this->order;
     }
 
     public function getValues(): array
     {
-        return $this->values;
+         return $this->values;
     }
 
     public function getSql(): string
     {
-        $columns = (count($this->columns) > 0) ? implode(', ', $this->columns) : '*';
+        $columns = (count($this->columns) > 0) ? implode(', ', $this->getColumns()) : '*';
+        $sql = sprintf('SELECT %1$s %2$s FROM %3$s', ($this->distinct === true) ? ' DISTINCT':'', $columns, $this->getTableName());
 
-        $sql = sprintf('SELECT %1$s %2$s FROM %3$s', ($this->isDistinct ? ' DISTINCT':''), $columns, $this->tableName);
-        $sql .= $this->getClauseUnion();
-        $sql .= $this->getClauseWhere();
-        $sql .= $this->getClauseGroupBy();
-        $sql .= $this->getClauseSort();
-        $sql .= $this->getClauseLimit();
+        if (!empty($this->getJoins())) {
+            foreach ($this->getJoins() as $joins) {
+                [$tableName, $condition, $type] = $joins;
+                $sql .= sprintf(' %1$s JOIN %2$s ON %3$s', strtoupper($type), $tableName, $condition);
+            }
+        }
+
+        if (!empty($this->getWhereConditions())) {
+           $i = 0;
+
+           foreach($this->getWhereConditions() as $whereCondition) {
+               [$condition, $parameters, $statement] = $whereCondition;
+               $this->values += $parameters;
+               $clause = ($i === 0 ? 'WHERE': strtoupper($statement));
+               $sql .= sprintf(" %s %s", $clause, $condition);
+               $i++;
+           }
+        }
+
+        if (!empty($this->getGroupBy())) {
+            $sql .= sprintf(' GROUP BY %1$s', implode(',', $this->getGroupBy()));
+
+            if (!empty($this->getHaving())) {
+                $sql .= sprintf(' HAVING %1$s', $this->getHaving());
+            }
+        }
+
+        $sql .= (!empty($this->getSort()) ? sprintf(' ORDER BY %1$s %2$s', $this->getSort(), $this->getOrder()) : '');
+
+        if (!empty($this->getNumberRows())) {
+            $sql .= sprintf(' LIMIT %1$s', $this->getNumberRows());
+
+            if (!empty($this->getOffsetValue())) {
+                $sql =  sprintf(' OFFSET %1$s', $this->getOffsetValue());
+            }
+        }
+
         return $sql;
     }
 
-    public function execute(): PDOStatement
+    public function fethOne(): ?array
     {
-        $this->values = [];
-        return $this->connection->executeStatement($this);
-    }
+        $row = $this->connection
+            ->setQueryStatement($this)
+            ->execute()
+            ->fetchOne();
 
-    public function fetchOne(): ?array
-    {
-        return ($row = $this->execute()->fetch()) ? $row : null;
-    }
+        $this->reset();
 
-    public function fetchColumn()
-    {
-        return $this->execute()->fetchColumn();
+        return $row;
     }
 
     public function fetchAll(): array
     {
-        return $this->execute()->fetchAll();
+        $rows = $this->connection
+            ->setQueryStatement($this)
+            ->execute()
+            ->fetchOne();
+
+        $this->reset();
+
+        return $rows;
     }
 
     public function count(): int
     {
-        return $this->select('COUNT(*)')->fetchColumn();
+        $result = $this->select('COUNT(*)')
+             ->setQueryStatement($this)
+             ->execute()
+             ->fetchColumn();
+
+        $this->reset();
+
+        return $result;
     }
 
-    public function getIterator()
+    public function getIterator(): Traversable
     {
         return new ArrayIterator($this->fetchAll());
     }
 
-    public function __toString(): string
+    protected function reset(): void
     {
-        return $this->getSql();
-    }
-
-    protected function getClauseUnion(): string
-    {
-       return (!empty($this->union) ? sprintf(' UNION %1$s', $this->union) : '');
-    }
-
-    protected function getClauseGroupBy(): string
-    {
-        return (!empty($this->group) ? sprintf(' GROUP BY %1$s', implode(',', $this->group)) : '');
-    }
-
-    protected function getClauseSort(): string
-    {
-        return (!empty($this->sort) ? sprintf(' ORDER BY %1$s %2$s', $this->sort, $this->order) : '');
+        $this->values = [];
+        $this->whereConditions = [];
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Pullay\Database\Query\Predicate;
 
-class In implements Expression
+class In extends BaseExpression
 {
      protected string $column;
      protected array $sets;
@@ -16,10 +16,5 @@ class In implements Expression
      public function getExpression(): string
      {
          return sprintf('%1$s IN (%2$s)', $this->column, implode(',', $this->sets));
-     }
-
-     public function __toString(): string
-     {
-          return $this->getExpression();
      }
 }

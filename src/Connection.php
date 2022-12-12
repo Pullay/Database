@@ -2,48 +2,35 @@
 
 namespace Pullay\Database;
 
-use PDO;
-use Psr\Log\LoggerInterface;
-use PDOStatement;
-use Pullay\Database\Query\Query;
-use Throwable;
+use Pullay\Database\Driver\DriverInterface;
+use Pullay\Database\Query\QueryInterface;
 
 use function array_fill;
 use function array_keys;
 use function array_values;
-use function count;
-use function implode;
-use function sprintf;
 
 class Connection
 {
-    protected Pdo $pdo;
-    protected ?LoggerInterface $logger;
+    protected DriverInterface $driver;
+    protected QueryInterface $queryStatement;
 
-    public function __construct(PDO $pdo, ?LoggerInterface $logger = null)
+    public function __construct(DriverInterface $driver)
     {
-        $this->pdo = $pdo;
-        $this->logger = $logger;
+        $this->driver = $driver;
     }
 
-    public function getPdo(): PDO
+    public function getDriver(): DriverInterface
     {
-        return $this->pdo;
+        return $this->driver;
     }
 
-    public function getServerVersion(): string
+    public function batchInsert(string $tableName, array $values): ?int
     {
-        return $this->pdo->getAttribute(PDO::ATTR_SERVER_VERSION);
-    }
-
-    public function getClientVersion(): string 
-    {
-        return $this->pdo->getAttribute(PDO::ATTR_CLIENT_VERSION);
-    }
-
-    public function getDriverName(): string
-    {
-        return $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $rowPlaceholder = array_fill(0, count($values), '?');
+        $rawQuery = sprintf('INSERT INTO %1$s (%2$s) VALUES (%3$s)', $tableName, implode(', ', array_keys($values)), implode(', ', $rowPlaceholder));
+        $this->driver->prepareQuery($rawQuery, array_values($values));
+        $insertId = $this->driver->lastInsertedId();
+        return ($insertId !== false) ? $insertId : null;
     }
 
     public function getQueryBuilder(): QueryBuilder
@@ -51,60 +38,17 @@ class Connection
         return new QueryBuilder($this);
     }
 
-    public function batchInsert(string $tableName, array $values): void
+    public function setQueryStatement(QueryInterface $queryStatement): self
     {
-        $rowPlaceholder = array_fill(0, count($values), '?');
-        $rawQuery = sprintf('INSERT INTO %1$s (%2$s) VALUES (%3$s)', $tableName, implode(', ', array_keys($values)), implode(', ', $rowPlaceholder));
-        $this->executeSql($rawQuery, array_values($values));
+        $this->queryStatement = $queryStatement;
+        return $this;
     }
 
-    public function executeSql(string $sql, array $values = []): PDOStatement
+    public function execute(): DriverInterface
     {
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($values);
-        return $stmt;
-    }
-
-    public function executeStatement(Query $query): PDOStatement
-    {
-         return $this->executeSql($query->getSql(), $query->getValues());
-    }
-
-    /**
-     * @return int|false
-     */
-    public function lastInsertedId()
-    {
-        return $this->pdo->lastInsertId();
-    }
-
-    public function beginTransaction(): bool
-    {
-        return $this->pdo->beginTransaction();
-    }
-
-    public function commit(): bool
-    {
-        return $this->pdo->commit();
-    }
-
-    public function rollBack(): bool
-    {
-        return $this->pdo->rollBack();
-    }
-
-    public function transaction(callable $callback)
-    {
-         $this->beginTransaction();
-
-         try {
-             $result = $callback($this);
-             $this->commit();
-         } catch (Throwable $e) {
-             $this->rollback();
-             throw $e;
-         }
-         
-         return $result;
+        if ($this->queryStatement) {
+            $driver = $this->driver->prepareQuery($this->queryStatement->getSql(), $this->queryStatement->getValues());
+            return $driver;
+        }
     }
 }
