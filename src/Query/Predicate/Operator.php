@@ -2,7 +2,7 @@
 
 namespace Pullay\Database\Query\Predicate;
 
-class Comparison extends BaseExpression
+class Operator extends BaseExpression
 {
      public const EQUAL_TO = '=';
      public const EQ  = '=';

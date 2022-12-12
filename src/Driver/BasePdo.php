@@ -50,7 +50,12 @@ abstract class BasePdo implements DriverInterface
         $this->statement  = $this->pdo->prepare($sql);
         $this->statement->execute($values);
         return $this;
-     }
+    }
+
+    public function lastInsertedId()
+    {
+        return $this->pdo->lastInsertId();
+    }
 
     public function fetchOne(int $mode = self::FETCH_ASSOC): ?array
     {
@@ -58,25 +63,19 @@ abstract class BasePdo implements DriverInterface
         return $row !== false ? $row : null;
     }
 
-    /**
-     * @return mixed
-     */
-    public function fetchColumn(int $mode = self::FETCH_ASSOC)
-    {
-        return $this->statement->fetchColumn($mode);
-    }
-
     public function fetchAll(int $mode = self::FETCH_ASSOC): array
     {
         return $this->statement->fetchAll($mode);
     }
 
-    /**
-     * @return int|false
-     */
-    public function lastInsertedId()
+    public function fetchColumn(int $mode = self::FETCH_ASSOC)
     {
-        return $this->pdo->lastInsertId();
+        return $this->statement->fetchColumn($mode);
+    }
+
+    public function rowCount(): int
+    {
+        return $this->statement->rowCount();
     }
 
     public function beginTransaction(): bool

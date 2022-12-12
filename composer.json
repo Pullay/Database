@@ -2,11 +2,11 @@
     "name": "pullay/database",
     "description": "Lite Query Builder for PHP",
     "type": "library",
-    "keywords": ["database", "query", "builder", "pdo"],
-    "homepage": "https://gihub.com/Pullay/database",
+    "keywords": ["database", "dbal", "pdo"],
+    "homepage": "https://github.com/Pullay/database",
     "license": "MIT",
     "require": {
-        "php": ">=7.1", 
+        "php": "^7.4 || ^8.0", 
         "ext-pdo": "*"
     },
     "autoload": {

@@ -70,9 +70,9 @@ $query->where(['id = :id' => ['id' => 1], 'username = :username' => ['username' 
 
 ```
 
-use Pullay\Database\Query\Predicate\Comparison
+use Pullay\Database\Query\Predicate\Operator;
 
-$query->where(Comparison::equalTo('id', ':id'), ['id' => 1]);
+$query->where(Operator::equalTo('id', ':id'), ['id' => 1]);
 ```
 
 ## Update

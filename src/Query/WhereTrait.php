@@ -11,7 +11,7 @@ trait WhereTrait
     protected array $whereConditions = [];
 
     /**
-     * @param Expression|string|array $condition
+     * @param string|array|ExpressionInterface $condition
      */
      public function where($condition, array $parameters = []): self
      {
@@ -37,7 +37,7 @@ trait WhereTrait
      }
 
     /**
-     * @param string|array $condition
+     * @param string|array|ExpressionInterface $condition
      */
     public function andWhere($condition, array $parameters = []): self
     {
@@ -45,7 +45,7 @@ trait WhereTrait
     }
 
     /**
-     * @param string|array $condition
+     * @param string|array|ExpressionInterface $condition
      */
     public function orWhere($condition, array $parameters = []): self
     {

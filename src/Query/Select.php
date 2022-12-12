@@ -5,6 +5,7 @@ namespace Pullay\Database\Query;
 use Pullay\Database\Connection;
 use Countable;
 use IteratorAggregate;
+use Pullay\Database\Query\Predicate\ExpressionInterface;
 use Traversable;
 
 use function is_array;
@@ -88,8 +89,19 @@ class Select extends BaseQuery implements Countable, IteratorAggregate
         return $this->groupBy;
     }
 
-    public function having(string $condition): self
+    /**
+     * @param string|ExpressionInterface
+     */
+    public function having($condition): self
     {
+        if (!$condition) {
+            return $this;
+        }
+
+        if ($condition instanceOf ExpressionInterface) {
+            $this->having = $condition->getExpression();
+        }
+
         $this->having = $condition;
         return $this;
     }
