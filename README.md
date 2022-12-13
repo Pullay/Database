@@ -12,86 +12,83 @@ Lite Query Builder for PHP
 composer require pullay/database dev-master
 ```
 
-## Get Starting
+## Get starting
 
 ```
-
 use Pullay\Database\Driver\PdoMysql;
 use Pullay\Database\Connection;
 
 $driver = PdoMysql::connection('localhost', 'test', 'user', 'password');
 $connection = new Connection($driver);
-$lastInsertId = $connection->batchInsert('user', ['username' => 'user', 'password' => 'password']);
+$query = $connection->getQueryBuilder()
+    ->select('user')
+    ->where(['id' => 1])
+    ->limit(1);
+
+$row = $query->fethOne();
 ```
+
+## Batch insert
+
+```
+$connection->batchInsert('users', ['username' => 'alex', 'password' => 'qwerty']);
+```
+
+## CRUD Query
 
 ## Insert
 
 ```
-$lastInsertId = $connection->getQueryBuilder()
-    ->insert('user')
-    ->values(['username' => 'user', 'password' => 'password'])
-    ->execute();
-
-$query->set('username', 'user')
-    ->set('password', 'password');
+$values = ['username' => 'alex', 'password' => 'qwerty'];
+$query = $connection->getQueryBuilder()
+    ->into('user')
+    ->values($values);
+$lastInsertId = $query->execute();
 ```
 
 ## Select
 
 ```
-$row = $connection->getQueryBuilder()
-    ->select('user')
-    ->where('id = :id', ['id' => 1])
-    ->limit(1)
-    ->fetchOne();
-
 $query = $connection->getQueryBuilder()
-    ->select('user');
+    ->select('user')
+    ->where(['id' => 1])
+    ->limit(1);
 
+// fetch one
+$row = $query->fetchOne();
+
+// fetch all
 $rows = $query->fetchAll();
 
+// or
 foreach ($query as $row) {
     echo $row['username'];
 }
 
+// count
+$count = $query->count();
 ```
 
 ## Where conditions
 
-```
-
-$query->where('id = :id', ['id' => 1]);
-
-$query->where('id = :id', ['id' => 1])
-    ->andWhere('username = :username', ['username' => 'user']);
-
-$query->where(['id = :id' => ['id' => 1], 'username = :username' => ['username' => 'user']]);
-```
-
-```
-
-use Pullay\Database\Query\Predicate\Operator;
-
-$query->where(Operator::equalTo('id', ':id'), ['id' => 1]);
-```
+## Join table
 
 ## Update
 
 ```
-$connection->getQueryBuilder()
+$query = $connection->getQueryBuilder()
     ->update('user')
-    ->sets(['password' => '123456'])
-    ->where('id = :id', ['id' => 1])
-    ->execute();
+    ->set('username', 'bob')
+    ->where(['id' => 1]);
+$rowCount = $query->execute();
 
-$query->set('password', '123456');
 ```
 
 ## Delete
 
 ```
-$connection->getQueryBuilder()
+$query = $connection->getQueryBuilder()
     ->delete('user')
-    ->where('id = :id', ['id' => 1])
-    ->execute();
+    ->where(['id' => 1]);
+$rowCount = $query->execute();
 ```

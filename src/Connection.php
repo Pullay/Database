@@ -12,7 +12,7 @@ use function array_values;
 class Connection
 {
     protected DriverInterface $driver;
-    protected QueryInterface $queryStatement;
+    protected ?QueryInterface $queryStatement;
 
     public function __construct(DriverInterface $driver)
     {
@@ -24,13 +24,15 @@ class Connection
         return $this->driver;
     }
 
-    public function batchInsert(string $tableName, array $values): ?int
+    /**
+     * @return false|int
+     */
+    public function batchInsert(string $tableName, array $values)
     {
         $rowPlaceholder = array_fill(0, count($values), '?');
         $rawQuery = sprintf('INSERT INTO %1$s (%2$s) VALUES (%3$s)', $tableName, implode(', ', array_keys($values)), implode(', ', $rowPlaceholder));
-        $this->driver->prepareQuery($rawQuery, array_values($values));
-        $insertId = $this->driver->lastInsertedId();
-        return ($insertId !== false) ? $insertId : null;
+        $result = $this->driver->prepareQuery($rawQuery, array_values($values));
+        return $result->lastInsertedId();;
     }
 
     public function getQueryBuilder(): QueryBuilder
@@ -44,11 +46,20 @@ class Connection
         return $this;
     }
 
-    public function execute(): DriverInterface
+    public function getQueryStatement(): QueryInterface
+    {
+        return $this->queryStatement;
+    }
+
+    /**
+     * @return DriverInterface|false
+     */
+    public function execute()
     {
         if ($this->queryStatement) {
-            $driver = $this->driver->prepareQuery($this->queryStatement->getSql(), $this->queryStatement->getValues());
-            return $driver;
+            return $this->driver->prepareQuery($this->queryStatement->getSql(), $this->queryStatement->getValues());
         }
+
+        return false;
     }
 }

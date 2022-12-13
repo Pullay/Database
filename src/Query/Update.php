@@ -84,14 +84,19 @@ class Update extends BaseQuery
         return $sql;
     }
 
-    public function execute(): void
+    /**
+     * @return int|false
+     */
+    public function execute()
     {
-        $this->connection
+        $result = $this->connection
            ->setQueryStatement($this)
            ->execute();
 
-        $this->tableName = '';
-        $this->values = [];
-        $this->whereConditions = [];
+        if ($result) {
+            return $result->rowCount();
+        }
+
+        return false;
     }
 }

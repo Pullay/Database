@@ -55,16 +55,19 @@ class Insert extends BaseQuery
         return $sql;
     }
 
-    public function execute(): ?int
+    /**
+     * @return int|false
+     */
+    public function execute()
     {
-        $driver = $this->connection
+        $result = $this->connection
            ->setQueryStatement($this)
            ->execute();
 
-        $this->tableName = '';
-        $this->values = [];
+        if ($result) {
+            return $result->lastInsertedId();
+        }
 
-        $insertId = $driver->lastInsertedId();
-        return ($insertId !== false) ? $insertId : null;
+        return false;
     }
 }

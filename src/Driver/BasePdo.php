@@ -17,7 +17,7 @@ abstract class BasePdo implements DriverInterface
     public const FETCH_OBJ   = PDO::FETCH_OBJ;
 
     protected PDO $pdo;
-    protected PDOStatement $statement;
+    protected ?PDOStatement $statement;
 
     public function __construct(string $dns, ?string $user = null, ?string $password = null, ?array $options = null)
      {
@@ -50,6 +50,11 @@ abstract class BasePdo implements DriverInterface
         $this->statement  = $this->pdo->prepare($sql);
         $this->statement->execute($values);
         return $this;
+    }
+
+    public function getStatement(): ?PDOStatement
+    {
+        return $this->statement;
     }
 
     public function lastInsertedId()

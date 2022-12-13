@@ -178,14 +178,12 @@ class Select extends BaseQuery implements Countable, IteratorAggregate
         return $sql;
     }
 
-    public function fethOne(): ?array
+    public function fetchOne(): ?array
     {
         $row = $this->connection
             ->setQueryStatement($this)
             ->execute()
             ->fetchOne();
-
-        $this->reset();
 
         return $row;
     }
@@ -197,31 +195,29 @@ class Select extends BaseQuery implements Countable, IteratorAggregate
             ->execute()
             ->fetchOne();
 
-        $this->reset();
-
         return $rows;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function fetchColumn()
+    {
+        $result = $this->connection
+            ->setQueryStatement($this)
+            ->execute()
+            ->fetchColumn();
+        return $result;
     }
 
     public function count(): int
     {
-        $result = $this->select('COUNT(*)')
-             ->setQueryStatement($this)
-             ->execute()
-             ->fetchColumn();
-
-        $this->reset();
-
-        return $result;
+        $query = clone $this;
+        return (int) $query->select('COUNT(*)')->fetchColumn();
     }
 
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this->fetchAll());
-    }
-
-    protected function reset(): void
-    {
-        $this->values = [];
-        $this->whereConditions = [];
     }
 }
