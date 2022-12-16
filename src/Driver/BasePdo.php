@@ -47,7 +47,7 @@ abstract class BasePdo implements DriverInterface
 
     public function prepareQuery(string $sql, array $values = []): self
     {
-        $this->statement  = $this->pdo->prepare($sql);
+        $this->statement = $this->pdo->prepare($sql);
         $this->statement->execute($values);
         return $this;
     }
@@ -73,9 +73,9 @@ abstract class BasePdo implements DriverInterface
         return $this->statement->fetchAll($mode);
     }
 
-    public function fetchColumn(int $mode = self::FETCH_ASSOC)
+    public function fetchColumn()
     {
-        return $this->statement->fetchColumn($mode);
+        return $this->statement->fetchColumn();
     }
 
     public function rowCount(): int

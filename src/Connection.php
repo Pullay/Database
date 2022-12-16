@@ -46,7 +46,7 @@ class Connection
         return $this;
     }
 
-    public function getQueryStatement(): QueryInterface
+    public function getQueryStatement(): ?QueryInterface
     {
         return $this->queryStatement;
     }

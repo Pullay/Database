@@ -5,6 +5,7 @@ namespace Pullay\Database\Query;
 use Pullay\Database\Connection;
 use Countable;
 use IteratorAggregate;
+use ArrayIterator;
 use Pullay\Database\Query\Predicate\ExpressionInterface;
 use Traversable;
 
@@ -59,7 +60,7 @@ class Select extends BaseQuery implements Countable, IteratorAggregate
     public function select($columns): self
     {
         if (is_string($columns)) {
-            $this->columns[] = $columns;
+            $this->columns[0] = $columns;
         } elseif (is_array($columns)) {
             $this->columns = $columns;
         }
@@ -193,7 +194,7 @@ class Select extends BaseQuery implements Countable, IteratorAggregate
         $rows = $this->connection
             ->setQueryStatement($this)
             ->execute()
-            ->fetchOne();
+            ->fetchAll();
 
         return $rows;
     }
