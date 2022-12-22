@@ -8,6 +8,7 @@ use Pullay\Database\Query\QueryInterface;
 use function array_fill;
 use function array_keys;
 use function array_values;
+use function sprintf;
 
 class Connection
 {

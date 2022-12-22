@@ -11,6 +11,7 @@ use Traversable;
 
 use function is_array;
 use function is_string;
+use function sprintf;
 use function strtoupper;
 
 class Select extends BaseQuery implements Countable, IteratorAggregate
@@ -136,20 +137,20 @@ class Select extends BaseQuery implements Countable, IteratorAggregate
 
     public function getSql(): string
     {
-        $columns = (count($this->columns) > 0) ? implode(', ', $this->getColumns()) : '*';
+        $columns = (count($this->columns) > 0) ? implode(', ', $this->columns) : '*';
         $sql = sprintf('SELECT %1$s %2$s FROM %3$s', ($this->distinct === true) ? ' DISTINCT':'', $columns, $this->getTableName());
 
-        if (!empty($this->getJoins())) {
-            foreach ($this->getJoins() as $joins) {
-                [$tableName, $condition, $type] = $joins;
+        if (!empty($this->joins)) {
+            foreach ($this->joins as $join) {
+                [$tableName, $condition, $type] = $join;
                 $sql .= sprintf(' %1$s JOIN %2$s ON %3$s', strtoupper($type), $tableName, $condition);
             }
         }
 
-        if (!empty($this->getWhereConditions())) {
+        if (!empty($this->whereConditions)) {
            $i = 0;
 
-           foreach($this->getWhereConditions() as $whereCondition) {
+           foreach($this->whereConditions as $whereCondition) {
                [$condition, $parameters, $statement] = $whereCondition;
                $this->values += $parameters;
                $clause = ($i === 0 ? 'WHERE': strtoupper($statement));
@@ -158,21 +159,21 @@ class Select extends BaseQuery implements Countable, IteratorAggregate
            }
         }
 
-        if (!empty($this->getGroupBy())) {
-            $sql .= sprintf(' GROUP BY %1$s', implode(',', $this->getGroupBy()));
+        if (!empty($this->groupBy)) {
+            $sql .= sprintf(' GROUP BY %1$s', implode(',', $this->groupBy));
 
-            if (!empty($this->getHaving())) {
-                $sql .= sprintf(' HAVING %1$s', $this->getHaving());
+            if (!empty($this->having)) {
+                $sql .= sprintf(' HAVING %1$s', $this->having);
             }
         }
 
-        $sql .= (!empty($this->getSort()) ? sprintf(' ORDER BY %1$s %2$s', $this->getSort(), $this->getOrder()) : '');
+        $sql .= (!empty($this->sort) ? sprintf(' ORDER BY %1$s %2$s', $this->sort, $this->order) : '');
 
-        if (!empty($this->getNumberRows())) {
-            $sql .= sprintf(' LIMIT %1$s', $this->getNumberRows());
+        if (!empty($this->numberRows)) {
+            $sql .= sprintf(' LIMIT %1$s', $this->numberRows);
 
-            if (!empty($this->getOffsetValue())) {
-                $sql =  sprintf(' OFFSET %1$s', $this->getOffsetValue());
+            if (!empty($this->offsetValue)) {
+                $sql =  sprintf(' OFFSET %1$s', $this->offsetValue);
             }
         }
 

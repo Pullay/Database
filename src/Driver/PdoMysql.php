@@ -4,6 +4,8 @@ namespace Pullay\Database\Driver;
 
 use PDO;
 
+use function sprintf;
+
 class PdoMysql extends BasePdo
 {
     public static function connection(string $host, string $dbname, string $user, string $password): self

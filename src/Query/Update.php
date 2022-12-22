@@ -5,6 +5,7 @@ namespace Pullay\Database\Query;
 use Pullay\Database\Connection;
 
 use function array_keys;
+use function sprintf;
 use function strtoupper;
 
 class Update extends BaseQuery
@@ -64,7 +65,7 @@ class Update extends BaseQuery
         if (!empty($this->getWhereConditions())) {
            $i = 0;
 
-           foreach($this->getWhereConditions() as $whereCondition) {
+           foreach($this->whereConditions as $whereCondition) {
                [$condition, $parameters, $statement] = $whereCondition;
                $this->values += $parameters;
                $clause = ($i === 0 ? 'WHERE': strtoupper($statement));
@@ -73,11 +74,11 @@ class Update extends BaseQuery
            }
         }
 
-        if (!empty($this->getNumberRows())) {
-            $sql .= sprintf(' LIMIT %1$s', $this->getNumberRows());
+        if (!empty($this->numberRows)) {
+            $sql .= sprintf(' LIMIT %1$s', $this->numberRows);
 
-            if (!empty($this->getOffsetValue())) {
-                $sql =  sprintf(' LIMIT %1$s OFFSET %2$s', $this->getNumberRows(), $this->getOffsetValue());
+            if (!empty($this->offsetValue)) {
+                $sql =  sprintf(' LIMIT %1$s OFFSET %2$s', $this->numberRows, $this->offsetValue);
             }
         }
 

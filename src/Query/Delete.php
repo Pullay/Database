@@ -4,6 +4,7 @@ namespace Pullay\Database\Query;
 
 use Pullay\Database\Connection;
 
+use function sprintf;
 use function strtoupper;
 
 class Delete extends BaseQuery
@@ -38,10 +39,10 @@ class Delete extends BaseQuery
     {
         $sql = sprintf('DELETE FROM %1$s', $this->tableName);
 
-        if (!empty($this->getWhereConditions())) {
+        if (!empty($this->whereConditions)) {
            $i = 0;
 
-           foreach($this->getWhereConditions() as $whereCondition) {
+           foreach($this->whereConditions as $whereCondition) {
                [$condition, $parameters, $statement] = $whereCondition;
                $this->values += $parameters;
                $clause = ($i === 0 ? 'WHERE': strtoupper($statement));
@@ -50,11 +51,11 @@ class Delete extends BaseQuery
            }
         }
 
-        if (!empty($this->getNumberRows())) {
-            $sql .= sprintf(' LIMIT %1$s', $this->getNumberRows());
+        if (!empty($this->numberRows)) {
+            $sql .= sprintf(' LIMIT %1$s', $this->numberRows);
 
-            if (!empty($this->getOffsetValue())) {
-                $sql =  sprintf(' LIMIT %1$s OFFSET %2$s', $this->getNumberRows(), $this->getOffsetValue());
+            if (!empty($this->offsetValue)) {
+                $sql =  sprintf(' LIMIT %1$s OFFSET %2$s', $this->numberRows, $this->offsetValue);
             }
         }
 

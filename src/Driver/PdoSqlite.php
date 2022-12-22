@@ -4,6 +4,8 @@ namespace Pullay\Database\Driver;
 
 use PDO;
 
+use function sprintf;
+
 class PdoSqlite extends BasePdo
 {
     public static function connection(string $database): self

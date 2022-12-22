@@ -21,8 +21,11 @@ abstract class BasePdo implements DriverInterface
 
     public function __construct(string $dns, ?string $user = null, ?string $password = null, ?array $options = null)
      {
+        if (!isset($options[PDO::ATTR_ERRMODE])) {
+            $options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
+        }
+
         $this->pdo = new PDO($dns, $user, $password, $options);
-        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
     public function setPdo(PDO $pdo): self
@@ -57,6 +60,11 @@ abstract class BasePdo implements DriverInterface
         return $this->statement;
     }
 
+    public function reset(): void
+    {
+        $this->statement = null;
+    }
+
     public function lastInsertedId()
     {
         return $this->pdo->lastInsertId();
@@ -70,17 +78,20 @@ abstract class BasePdo implements DriverInterface
 
     public function fetchAll(int $mode = self::FETCH_ASSOC): array
     {
-        return $this->statement->fetchAll($mode);
+        $rows = $this->statement->fetchAll($mode);
+        return $rows;
     }
 
     public function fetchColumn()
     {
-        return $this->statement->fetchColumn();
+        $result = $this->statement->fetchColumn();
+        return $result;
     }
 
     public function rowCount(): int
     {
-        return $this->statement->rowCount();
+        $result = $this->statement->rowCount();
+        return $result;
     }
 
     public function beginTransaction(): bool

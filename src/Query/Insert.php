@@ -7,6 +7,7 @@ use Pullay\Database\Connection;
 use function array_fill;
 use function array_keys;
 use function array_values;
+use function sprintf;
 
 class Insert extends BaseQuery
 {
