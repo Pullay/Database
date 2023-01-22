@@ -6,18 +6,21 @@ use Pullay\Database\TransactionInterface;
 
 interface DriverInterface extends TransactionInterface
 {
-    public function prepareQuery(string $sql, array $values = []): self;
+    /**
+     * @return string
+     */
+    public function getDrivername();
 
     /**
-     * @return int|false
+     * @param string $sql
+     * @param array $params
+     * @return ResultInterface
+     */
+    public function prepareQuery($sql, $params = []);
+
+    /**
+     * @return int
      */
     public function lastInsertedId();
-    public function fetchOne(): ?array;
-    public function fetchAll(): array;
-
-    /**
-     * @return mixed
-     */
-    public function fetchColumn();
-    public function rowCount(): int;
 }
+

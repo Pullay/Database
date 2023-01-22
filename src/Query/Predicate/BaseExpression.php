@@ -4,12 +4,18 @@ namespace Pullay\Database\Query\Predicate;
 
 class BaseExpression implements ExpressionInterface
 {
-    public function getExpression(): string
+    /**
+     * {@inheritdoc}
+     */
+    public function getExpression()
     {
         return '';
     }
 
-    public function __toString(): string
+    /**
+     * @return string
+     */
+    public function __toString()
     {
         return (string) $this->getExpression();
     }

@@ -4,27 +4,47 @@ namespace Pullay\Database\Query\Predicate;
 
 class Like extends BaseExpression
 {
-     protected string $column;
-     protected string $pattern;
+    /**
+     * @var string 
+     */
+    protected $field = '';
 
-     public function __construct(string $column, string $pattern)
-     {
-         $this->column = $column;
-         $this->pattern = $pattern;
-     }
+    /**
+     * @var string 
+     */
+    protected $pattern = '';
 
-     public function getColumn(): string
-     {
-         return $this->column;
-     }
+    /**
+     * @param string $column
+     * @param string $pattern
+     */
+    public function __construct($column, $pattern)
+    {
+        $this->column = $column;
+        $this->pattern = $pattern;
+    }
 
-     public function getPattern(): string 
-     {
-         return $this->pattern;
-     }
+    /**
+     * @return string
+     */
+    public function getColumn()
+    {
+        return $this->column;
+    }
 
-     public function getExpression(): string
-     {
+    /**
+     * @return string
+     */
+    public function getPattern()
+    {
+        return $this->pattern;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getExpression()
+    {
          return sprintf('%1$s LIKE %2$s', $this->column, $this->pattern);
-     }
+    }
 }

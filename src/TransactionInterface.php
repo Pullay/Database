@@ -4,7 +4,18 @@ namespace Pullay\Database;
 
 interface TransactionInterface
 {
-     public function beginTransaction(): bool;
-     public function commit(): bool;
-     public function rollBack(): bool;
+    /**
+     * @return bool
+     */
+    public function beginTransaction();
+
+    /**
+     * @return bool
+     */
+    public function commit();
+
+    /**
+     * @return bool
+     */
+    public function rollBack();
 }

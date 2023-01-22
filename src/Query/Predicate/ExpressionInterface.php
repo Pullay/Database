@@ -4,5 +4,8 @@ namespace Pullay\Database\Query\Predicate;
 
 interface ExpressionInterface
 {
-    public function getExpression(): string;
+    /**
+     * @return string
+     */
+    public function getExpression();
 }

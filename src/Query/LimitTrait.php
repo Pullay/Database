@@ -4,34 +4,60 @@ namespace Pullay\Database\Query;
 
 trait LimitTrait
 {
-    protected ?int $numberRows = null;
-    protected ?int $offsetValue = null;
+    /**
+     * @var int|null
+     */
+    protected $numberRows = null;
 
-    public function limit(int $numberRows, ?int $offsetValue = null): self
+    /**
+     * @var int|null
+     */
+    protected $offsetValue = null;
+
+    /**
+     * @param int $numberRows
+     * @param int|null $offsetValue
+     * @return self
+     */
+    public function limit($numberRows, $offsetValue = null)
     {
         $this->numberRows = $numberRows;
         $this->offsetValue = $offsetValue;
         return $this;
     }
 
-    public function take(int $numberRows): self
+    /**
+     * @param int $numberRows
+     * @return self
+     */
+    public function take($numberRows)
     {
         $this->numberRows = $numberRows;
         return $this;
     }
 
-    public function getNumberRows(): ?int
+    /**
+     * @return int|null
+     */
+    public function getNumberRows()
     {
         return $this->numberRows;
     }
 
-    public function skip(int $offsetValue): self
+    /**
+     * @param int|null $offsetValue
+     * @return self
+     */
+    public function skip($offsetValue)
     {
         $this->offsetValue = $offsetValue;
         return $this;
     }
 
-    public function getOffsetValue(): ?int
+    /**
+     * @return int|null
+     */
+    public function getOffsetValue()
     {
         return $this->offsetValue;
     }

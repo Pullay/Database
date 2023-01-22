@@ -2,30 +2,82 @@
 
 namespace Pullay\Database\Query;
 
+use Pullay\Database\Connection;
+
+use function is_string;
+
 abstract class BaseQuery implements QueryInterface
 {
-    protected string $tableName;
+    /**
+     * @var Connection
+     */
+    protected $connection; 
 
-    public function setTableName(string $tableName): void
+    /**
+     * @var string
+     */
+    protected $tableName = null;
+
+    /**
+     * @param Connection $connection
+     * @param string $tableName
+     */
+    public function __construct(Connection $connection, $tableName)
     {
-        $this->tableName = $tableName;
+        $this->connection = $connection;
+        $this->setTableName($tableName);
     }
 
-    public function getTableName(): string
+    /**
+     * @param Connection $connection
+     * @return self
+     */
+    public function setConnection(Connection $connection)
     {
-        return $this->tableName;
+        $this->connection = $connection;
+        return $this;
     }
 
-    public function getValues(): array
+    /**
+     * @param string $tableName
+     * @return self
+     */
+    public function setTableName($tableName)
+    {
+        if (is_string($tableName)) {
+            $this->tableName = $tableName;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getTableName()
+    {
+        return $tableName;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getValues()
     {
         return [];
     }
 
-    public function getSql(): string
+    /**
+     * {@inheritdoc}
+     */
+    public function getSql()
     {
         return '';
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return (string) $this->getSql();

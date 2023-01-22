@@ -2,56 +2,69 @@
 
 namespace Pullay\Database\Query;
 
-use Pullay\Database\Connection;
-
 use function array_keys;
+use function is_array;
+use function is_string;
 use function sprintf;
 use function strtoupper;
 
-class Update extends BaseQuery
+class Update extends BaseQuery 
 {
     use WhereTrait;
     use LimitTrait;
 
-    protected Connection $connection;
-    protected array $values = [];
+    /**
+     * @var array
+     */
+    protected $values = [];
 
-    public function __construct(Connection $connection, ?string $tableName = null)
-    {
-        $this->connection = $connection;
-
-        if ($tableName) {
-            $this->table($tableName);
-        }
-    }
-
-    public function table(string $tableName): self
+    /**
+     * @param string $tableName
+     * @return self
+     */
+    public function table($tableName)
     {
         $this->setTableName($tableName);
         return $this;
     }
 
-    public function sets(array $values): self
+    /**
+     * @param array $values
+     * @return self
+     */
+    public function sets($values)
     {
-        $this->values += $values;
+        if (is_array($values)) {
+            $this->values += $values;
+        }
         return $this;
     }
 
     /**
+     * @param string $column
      * @param mixed $value
+     * @return self
      */
-    public function set(string $column, $value): self
+    public function set($column, $value)
     {
-        $this->values[$column] = $value;
+        if (is_string($column)) {
+           $this->values[$column] = $value;
+        }
         return $this;
     }
 
-    public function getValues(): array
+    /**
+     * {@inheritdoc}
+     */
+    public function getValues()
     {
         return $this->values;
     }
 
-    public function getSql(): string
+    /**
+     * {@inheritdoc}
+     */
+    public function getSql()
     {
         $columns = array_keys($this->values);
         $rowPlaceholder = [];
@@ -61,24 +74,21 @@ class Update extends BaseQuery
         }
 
         $sql = sprintf('UPDATE %1$s SET %2$s', $this->tableName, implode(', ', $rowPlaceholder));
+        $i = 0;
 
-        if (!empty($this->getWhereConditions())) {
-           $i = 0;
-
-           foreach($this->whereConditions as $whereCondition) {
-               [$condition, $parameters, $statement] = $whereCondition;
-               $this->values += $parameters;
-               $clause = ($i === 0 ? 'WHERE': strtoupper($statement));
-               $sql .= sprintf(" %s %s", $clause, $condition);
-               $i++;
-           }
+        foreach($this->whereConditions as $whereCondition) {
+            list($statement, $condition, $params) = $whereCondition;
+            $clause = ($i === 0 ? 'WHERE': strtoupper($statement));
+            $sql .= sprintf(' %1$s %2$s', $clause, $condition);
+            $this->values += $params;
+            $i++;
         }
 
         if (!empty($this->numberRows)) {
             $sql .= sprintf(' LIMIT %1$s', $this->numberRows);
 
             if (!empty($this->offsetValue)) {
-                $sql =  sprintf(' LIMIT %1$s OFFSET %2$s', $this->numberRows, $this->offsetValue);
+                $sql =  sprintf(' OFFSET %1$s', $this->offsetValue);
             }
         }
 
@@ -86,18 +96,12 @@ class Update extends BaseQuery
     }
 
     /**
-     * @return int|false
+     * @return int
      */
     public function execute()
     {
         $result = $this->connection
-           ->setQueryStatement($this)
-           ->execute();
-
-        if ($result) {
-            return $result->rowCount();
-        }
-
-        return false;
+            ->executeQueryStatement($this);
+        return $result->numRows();
     }
 }

@@ -3,64 +3,56 @@
 namespace Pullay\Database;
 
 use Pullay\Database\Driver\DriverInterface;
+use Pullay\Database\Driver\ResultInterface;
 use Pullay\Database\Query\QueryInterface;
-
-use function array_fill;
-use function array_keys;
-use function array_values;
-use function sprintf;
 
 class Connection
 {
-    protected DriverInterface $driver;
-    protected ?QueryInterface $queryStatement;
+    /**
+     * @var DriverInterface
+     */
+    protected $driver;
 
+    /**
+     * @param DriverInterface $driver
+     */
     public function __construct(DriverInterface $driver)
     {
         $this->driver = $driver;
     }
 
-    public function getDriver(): DriverInterface
+    /**
+     * @param DriverInterface
+     */
+    public function getDriver()
     {
         return $this->driver;
     }
 
     /**
-     * @return false|int
+     * @param string $sql
+     * @param array $params
+     * @return ResultInterface
      */
-    public function batchInsert(string $tableName, array $values)
+    public function rawQuery($sql, $params = [])
     {
-        $rowPlaceholder = array_fill(0, count($values), '?');
-        $rawQuery = sprintf('INSERT INTO %1$s (%2$s) VALUES (%3$s)', $tableName, implode(', ', array_keys($values)), implode(', ', $rowPlaceholder));
-        $result = $this->driver->prepareQuery($rawQuery, array_values($values));
-        return $result->lastInsertedId();;
+        return $this->driver->prepareQuery($sql, $params);
     }
 
-    public function getQueryBuilder(): QueryBuilder
+    /**
+     * @return QueryBuilder
+     */
+    public function getQueryBuilder()
     {
         return new QueryBuilder($this);
     }
 
-    public function setQueryStatement(QueryInterface $queryStatement): self
-    {
-        $this->queryStatement = $queryStatement;
-        return $this;
-    }
-
-    public function getQueryStatement(): ?QueryInterface
-    {
-        return $this->queryStatement;
-    }
-
     /**
-     * @return DriverInterface|false
+     * @param Query $query
+     * @return ResultInterface
      */
-    public function execute()
+    public function executeQueryStatement(QueryInterface $query)
     {
-        if ($this->queryStatement) {
-            return $this->driver->prepareQuery($this->queryStatement->getSql(), $this->queryStatement->getValues());
-        }
-
-        return false;
+        return $this->driver->prepareQuery($query->getSql(), $query->getValues());
     }
 }

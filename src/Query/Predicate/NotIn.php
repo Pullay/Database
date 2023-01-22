@@ -2,13 +2,13 @@
 
 namespace Pullay\Database\Query\Predicate;
 
-class IsNotNull extends IsNull
+class NotIn extends In
 {
     /**
      * {@inheritdoc}
      */
     public function getExpression()
     {
-        return sprintf('%1$s IS NOT NULL', $this->column);
+        return sprintf('%1$s NOT IN (%2$s)', $this->column, implode(',', $this->valueSet));
     }
 }

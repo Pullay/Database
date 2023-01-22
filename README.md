@@ -28,12 +28,6 @@ $query = $connection->getQueryBuilder()
 $row = $query->fethOne();
 ```
 
-## Batch insert
-
-```
-$connection->batchInsert('users', ['username' => 'alex', 'password' => 'qwerty']);
-```
-
 ## CRUD Query
 
 ## Insert
@@ -54,8 +48,8 @@ $query = $connection->getQueryBuilder()
     ->where(['id' => 1])
     ->limit(1);
 
-// fetch one
-$row = $query->fetchOne();
+// fetch
+$row = $query->fetch();
 
 // fetch all
 $rows = $query->fetchAll();

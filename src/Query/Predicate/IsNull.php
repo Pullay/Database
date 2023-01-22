@@ -4,20 +4,32 @@ namespace Pullay\Database\Query\Predicate;
 
 class IsNull extends BaseExpression
 {
-     protected string $column;
+    /**
+     * @var string 
+     */
+    protected $column;
 
-     public function __construct(string $column)
-     {
-         $this->column = $column;
-     }
+    /**
+     * @param string $column
+     */
+    public function __construct($column)
+    {
+        $this->column = $column;
+    }
 
-     public function getColumn(): string
-     {
-         return $this->column;
-     }
+    /**
+     * @return string
+     */
+    public function getColumn()
+    {
+        return $this->column;
+    }
 
-     public function getExpression(): string
-     {
-         return sprintf('%1$s IS NULL', $this->column);
-     }
+    /**
+     * {@inheritdoc}
+     */
+    public function getExpression()
+    {
+        return sprintf('%1$s IS NULL', $this->column);
+    }
 }

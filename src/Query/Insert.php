@@ -2,54 +2,67 @@
 
 namespace Pullay\Database\Query;
 
-use Pullay\Database\Connection;
-
 use function array_fill;
 use function array_keys;
 use function array_values;
+use function is_array;
+use function is_string;
 use function sprintf;
 
 class Insert extends BaseQuery
 {
-    protected Connection $connection;
-    protected array $values = [];
+    /**
+     * @var array
+     */
+    protected $values = [];
 
-    public function __construct(Connection $connection, ?string $tableName = null)
-    {
-        $this->connection = $connection;
-
-        if ($tableName) {
-            $this->into($tableName);
-        }
-    }
-
-    public function into(string $tableName): self
+    /**
+     * @param string $tableName
+     * @return self
+     */
+    public function into($tableName)
     {
         $this->setTableName($tableName);
         return $this;
     }
 
-    public function values(array $values): self
+    /**
+     * @param array $values
+     * @return self
+     */
+    public function values($values)
     {
-        $this->values += $values;
+        if (is_array($values)) {
+            $this->values += $values;
+        }
         return $this;
     }
 
     /**
+     * @param string $column
      * @param mixed $value
+     * @return self
      */
-    public function set(string $column, $value): self
+    public function set($column, $value)
     {
-        $this->values[$column] = $value;
+        if (is_string($column)) {
+           $this->values[$column] = $value;
+        }
         return $this;
     }
 
-    public function getValues(): array
+    /**
+     * {@inheritdoc}
+     */
+    public function getValues()
     {
         return array_values($this->values);
     }
 
-    public function getSql(): string
+    /**
+     * {@inheritdoc}
+     */
+    public function getSql()
     {
         $rowPlaceholder = array_fill(0, count($this->values), '?');
         $sql = sprintf('INSERT INTO %1$s (%2$s) VALUES (%3$s)', $this->tableName, implode(', ', array_keys($this->values)), implode(', ', $rowPlaceholder));
@@ -57,18 +70,14 @@ class Insert extends BaseQuery
     }
 
     /**
-     * @return int|false
+     * @return int
      */
     public function execute()
     {
-        $result = $this->connection
-           ->setQueryStatement($this)
-           ->execute();
-
-        if ($result) {
-            return $result->lastInsertedId();
-        }
-
-        return false;
+        $this->connection
+           ->executeQueryStatement($this);
+        return $this->connection
+           ->getDriver()
+           ->lastInsertId();
     }
 }

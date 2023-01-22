@@ -6,7 +6,7 @@
     "homepage": "https://github.com/Pullay/database",
     "license": "MIT",
     "require": {
-        "php": "^7.4 || ^8.0", 
+        "php": ">=5.6", 
         "ext-pdo": "*"
     },
     "autoload": {

@@ -4,20 +4,32 @@ namespace Pullay\Database\Query\Predicate;
 
 class Exits extends BaseExpression
 {
-     protected string $subQuery; 
+    /**
+     * @var string 
+     */
+    protected $subQuery; 
 
-     public function __construct(string $subQuery)
-     {
-         $this->subQuery = $subQuery;
-     }
+    /**
+     * @param string $subQuery
+     */
+    public function __construct($subQuery)
+    {
+        $this->subQuery = $subQuery;
+    }
 
-     public function getSubQuery(): string
-     {
-         return $this->subQuery;
-     }
+    /**
+     * @return string
+     */
+    public function getSubQuery()
+    {
+        return $this->subQuery;
+    }
 
-     public function getExpression(): string
-     {
-         return sprintf('EXIST %1$s', $this->subQuery);
-     }
+    /**
+     * {@inheritdoc}
+     */
+    public function getExpression()
+    {
+        return sprintf('EXIST %1$s', $this->subQuery);
+    }
 }

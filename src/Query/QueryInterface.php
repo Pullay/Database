@@ -4,6 +4,13 @@ namespace Pullay\Database\Query;
 
 interface QueryInterface
 {
-    public function getValues(): array;
-    public function getSql(): string;
+    /**
+     * @return array
+     */
+    public function getValues();
+
+    /**
+     * @return string
+     */
+    public function getSql();
 }

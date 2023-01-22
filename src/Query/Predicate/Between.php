@@ -4,34 +4,62 @@ namespace Pullay\Database\Query\Predicate;
 
 class Between extends BaseExpression
 {
-     protected string $column;
-     protected int $minValue;
-     protected int $maxValue;
+    /**
+     * @var string 
+     */
+    protected $column = '';
 
-     public function __construct(string $column, int $minValue, int $maxValue)
-     {
-         $this->column   = $column;
-         $this->minValue = $start;
-         $this->maxValue = $end;
-     }
+    /**
+     * @var string|int
+     */
+    protected $minValue = '';
 
-     public function getColumn(): string
-     {
-         return $this->column;
-     }
+    /**
+     * @var string|int
+     */
+    protected $maxValue = '';
 
-     public function getMinValue(): int
-     {
-         return $this->minValue;
-     }
+    /**
+     * @param string $column
+     * @param string|int $minValue
+     * @param string|int $maxValue
+     */
+    public function __construct($column, $minValue, $maxValue)
+    {
+        $this->column   = $column;
+        $this->minValue = $start;
+        $this->maxValue = $end;
+    }
 
-     public function getMaxValue(): int
-     {
-         return $this->maxValue;
-     }
+    /**
+     * @return string
+     */
+    public function getColumn(): string
+    {
+        return $this->column;
+    }
 
-     public function getExpression(): string
-     {
+    /**
+     * @return string|int
+     */
+    public function getMinValue()
+    {
+        return $this->minValue;
+    }
+
+    /**
+     * @return string|int
+     */
+    public function getMaxValue()
+    {
+        return $this->maxValue;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getExpression()
+    {
          return sprintf('%1$s BETWEEN %2$s AND %3$s', $this->column, $this->minValue, $this->maxValue);
-     }
+    }
 }

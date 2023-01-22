@@ -9,37 +9,51 @@ use Pullay\Database\Query\Delete;
 
 class QueryBuilder
 {
-    protected Connection $connection;
+    /**
+     * @var Connection
+     */
+    protected $connection; 
 
+    /**
+     * @param Connection $connection
+     */
     public function __construct(Connection $connection)
     {
-         $this->connection = $connection;
+        $this->connection = $connection;
     }
 
-    public function getConnection(): Connection
-    {
-         return $this->connection;
-    }
-
-    public function insert(?string $tableName = null): Insert
+    /**
+     * @param string $tableName
+     * @return Insert
+     */
+    public function insert($tableName)
     {
         return new Insert($this->connection, $tableName);
     }
 
     /**
-     * @param array|string $columns
+     * @param string $tableName
+     * @return Select
      */
-    public function select(?string $tableName = null, $columns = '*'): Select
+    public function select($tableName)
     {
-        return new Select($this->connection, $tableName, $columns);
+        return new Select($this->connection, $tableName);
     }
 
-    public function update(?string $tableName = null): Update
+    /**
+     * @param string $tableName
+     * @return Update
+     */
+    public function update($tableName)
     {
-        return new Update($this->connection, $tableName);
+        return new Update($this->connection, $tableName); 
     }
 
-    public function delete(?string $tableName = null): Delete
+    /**
+     * @param string $tableName
+     * @return Delete
+     */
+    public function delete($tableName)
     {
         return new Delete($this->connection, $tableName);
     }
