@@ -15,10 +15,10 @@ composer require pullay/database dev-master
 ## Get starting
 
 ```
-use Pullay\Database\Driver\PdoMysql;
+use Pullay\Database\Driver\Mysql;
 use Pullay\Database\Connection;
 
-$driver = PdoMysql::connection('localhost', 'test', 'user', 'password');
+$driver = Mysql::connect('localhost', 'test', 'user', 'password');
 $connection = new Connection($driver);
 $query = $connection->getQueryBuilder()
     ->select('user')
