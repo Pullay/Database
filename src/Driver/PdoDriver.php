@@ -81,7 +81,7 @@ class PdoDriver implements DriverInterface
     /**
      * {@inheritdoc}
      */
-    public function lastInsertedId()
+    public function lastInsertId()
     {
         $insertId = $this->pdo->lastInsertId();
         return $insertId === false ? 0 : (int) $insertId;

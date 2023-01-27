@@ -21,6 +21,6 @@ interface DriverInterface extends TransactionInterface
     /**
      * @return int
      */
-    public function lastInsertedId();
+    public function lastInsertId();
 }
 
