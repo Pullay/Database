@@ -172,7 +172,7 @@ class Select extends BaseQuery implements Countable, IteratorAggregate
             $sql .= sprintf(' LIMIT %1$s', $this->numberRows);
 
             if (!empty($this->offsetValue)) {
-                $sql =  sprintf(' OFFSET %1$s', $this->offsetValue);
+                $sql .=  sprintf(' OFFSET %1$s', $this->offsetValue);
             }
         }
 
