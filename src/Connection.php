@@ -6,7 +6,7 @@ use Pullay\Database\Driver\DriverInterface;
 use Pullay\Database\Driver\ResultInterface;
 use Pullay\Database\Query\QueryInterface;
 
-class Connection
+class Connection implements TransactionInterface
 {
     /**
      * @var DriverInterface
@@ -54,5 +54,29 @@ class Connection
     public function executeQueryStatement(QueryInterface $query)
     {
         return $this->driver->prepareQuery($query->getSql(), $query->getValues());
+    }
+
+    /**
+     * @return bool
+     */
+    public function beginTransaction()
+    {
+        return $this->driver->beginTransaction();
+    }
+
+    /**
+     * @return bool
+     */
+    public function commit()
+    {
+        return $this->driver->rollBack();
+    }
+
+    /**
+     * @return bool
+     */
+    public function rollBack()
+    {
+        return $this->driver->rollBack();
     }
 }

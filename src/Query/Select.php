@@ -4,6 +4,7 @@ namespace Pullay\Database\Query;
 
 use Countable;
 use IteratorAggregate;
+use Pullay\Database\Connection;
 use ArrayIterator;
 use Traversable;
 
@@ -14,8 +15,12 @@ use function strtoupper;
 
 class Select extends BaseQuery implements Countable, IteratorAggregate
 {
+    use JoinTrait;
     use WhereTrait;
     use LimitTrait;
+
+    const SORT_ASC = 'ASC';
+    const SORT_DESC = 'DESC';
 
     /**
      * @var bool
@@ -33,19 +38,24 @@ class Select extends BaseQuery implements Countable, IteratorAggregate
     protected $groupBy = [];
 
     /**
-     * @var string|null
+     * @var array
      */
-    protected $order = null;
-
-    /**
-     * @var string|null
-     */
-    protected $sort = null;
+    protected $orderBy = [];
 
     /**
      * @var array
      */
     protected $values = [];
+
+    /**
+     * {@inheritdoc}
+     * @param array|string $columns
+     */
+    public function __construct(Connection $connection, $tableName, $columns = '*')
+    {
+        $this->select($columns);
+        parent::__construct($connection, $tableName);
+    }
 
     /**
      * @return self
@@ -110,31 +120,40 @@ class Select extends BaseQuery implements Countable, IteratorAggregate
     }
 
     /**
-     * @param string $sort
+     * @param string $expression
      * @param string $order
      * @return self
      */
-    public function orderBy($sort, $order = null): self
+    public function orderBy($expression, $sort = self::SORT_ASC): self
     {
-        $this->sort = $sort;
-        $this->order = $order;
+        $this->orderBy = [$expression, $sort];
         return $this;
     }
 
     /**
-     * @return string|null
+     * @param string $expression
+     * @return self
      */
-    public function getSort()
+    public function orderByAsc($expression)
     {
-        return $this->sort;
+        return $this->orderBy($expression, 'ASC');
     }
 
     /**
-     * @return string|null
+     * @param string $expression
+     * @return self
      */
-    public function getOrder()
+    public function orderByDesc($expression)
     {
-        return $this->order;
+        return $this->orderBy($expression, 'DESC');
+    }
+
+    /**
+     * @return array
+     */
+    public function getOrderBy()
+    {
+        return $this->orderBy;
     }
 
     /**
@@ -151,7 +170,14 @@ class Select extends BaseQuery implements Countable, IteratorAggregate
     public function getSql()
     {
         $columns = (count($this->columns) > 0) ? implode(', ', $this->columns) : '*';
-        $sql = sprintf('SELECT %1$s %2$s FROM %3$s', ($this->isDistinct === true ? 'DISTINCT' : ''), $columns, $this->tableName);
+        $distinct = ($this->isDistinct === true ? 'DISTINCT' : '');
+        $sql = "SELECT $distinct $columns FROM $this->tableName";
+
+        foreach ($this->join as $join) {
+            list($type, $table, $on) = $join;
+            $sql .= sprintf(' %1$s JOIN %2$s ON %3$s', strtoupper($type), $table, $on);
+        }
+
         $i = 0;
 
         foreach($this->whereConditions as $whereCondition) {
@@ -166,13 +192,16 @@ class Select extends BaseQuery implements Countable, IteratorAggregate
             $sql .= sprintf(' GROUP BY %1$s', implode(',', $this->groupBy));
         }
 
-        $sql .= (!empty($this->sort) ? sprintf(' ORDER BY %1$s %2$s', $this->sort, $this->order) : '');
+        if (!empty($this->orderBy)) {
+            list($expression, $sort) = $this->orderBy;
+            $sql .= sprintf(' ORDER BY %1$s %2$s', strtoupper($expression), $sort);
+        }
 
         if (!empty($this->numberRows)) {
-            $sql .= sprintf(' LIMIT %1$s', $this->numberRows);
+            $sql .= " LIMIT $this->numberRows";
 
             if (!empty($this->offsetValue)) {
-                $sql .=  sprintf(' OFFSET %1$s', $this->offsetValue);
+                $sql .=  " OFFSET $this->offsetValue";
             }
         }
 
@@ -200,12 +229,13 @@ class Select extends BaseQuery implements Countable, IteratorAggregate
     }
 
     /**
+     * @param string $column
      * @return int
      */
-    public function count()
+    public function count($column = '*')
     {
         $sql = clone $this;
-        return $sql->select('COUNT(*)')->numRows();
+        return $sql->select('COUNT($column)')->numRows();
     }
 
     /**

@@ -33,11 +33,12 @@ class QueryBuilder
 
     /**
      * @param string $tableName
+     * @param array|string $columns
      * @return Select
      */
-    public function select($tableName)
+    public function select($tableName, $columns = '*')
     {
-        return new Select($this->connection, $tableName);
+        return new Select($this->connection, $tableName, $columns);
     }
 
     /**

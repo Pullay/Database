@@ -9,7 +9,6 @@ class Delete extends BaseQuery
 {
     use WhereTrait;
     use LimitTrait;
-    
 
     /**
      * @var array
@@ -39,7 +38,7 @@ class Delete extends BaseQuery
      */
     public function getSql()
     {
-        $sql = sprintf('DELETE FROM %1$s', $this->tableName);
+        $sql = "DELETE FROM $this->tableName";
         $i = 0;
 
         foreach($this->whereConditions as $whereCondition) {
@@ -51,10 +50,10 @@ class Delete extends BaseQuery
         }
 
         if (!empty($this->numberRows)) {
-            $sql .= sprintf(' LIMIT %1$s', $this->numberRows);
+            $sql .= " LIMIT $this->numberRows";
 
             if (!empty($this->offsetValue)) {
-                $sql =  sprintf(' OFFSET %1$s', $this->offsetValue);
+                $sql .= " OFFSET $this->offsetValue";
             }
         }
 

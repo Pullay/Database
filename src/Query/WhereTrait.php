@@ -16,9 +16,10 @@ trait WhereTrait
     /**
      * @param string|array|ExpressionInterface $condition
      * @param array $parameters
+     * @param string $statement
      * @return self
      */
-     public function where($condition, $parameters = [])
+     public function where($condition, $parameters = [], $statement = 'AND')
      {
         if (!$condition) {
             return $this;
@@ -37,7 +38,7 @@ trait WhereTrait
             return $this;
         }
 
-        $this->addWhereConditions('AND', $condition, $parameters);
+        $this->whereConditions[] = [$statement, $condition, $parameters];
         return $this;
      }
 
@@ -58,25 +59,7 @@ trait WhereTrait
      */
     public function orWhere($condition, $parameters = [])
     {
-        if (!$condition) {
-            return $this;
-        }
-
-        if ($condition instanceOf ExpressionInterface) {
-             $this->where($condition->getExpression(), $parameters);
-             return $this;
-        }
-
-        if (is_array($condition)) {
-            foreach ($condition as $key => $value) {
-                $this->orWhere($key, $value);
-            }
-
-            return $this;
-        }
-
-        $this->addWhereConditions('OR', $condition, $parameters);
-        return $this;
+        return $this->where($condition, $parameters, 'OR');
     }
 
     /**
@@ -85,15 +68,5 @@ trait WhereTrait
     public function getWhereConditions()
     {
          return $this->whereConditions;
-    }
-
-    /**
-     * @param string $statement
-     * @param string|array|ExpressionInterface $condition
-     * @param array $parameters
-     */
-    protected function addWhereConditions($statement, $condition, $parameters)
-    {
-        $this->whereConditions[] = [$statement, $condition, $parameters];
     }
 }
