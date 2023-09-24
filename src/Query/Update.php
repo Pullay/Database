@@ -37,6 +37,7 @@ class Update extends BaseQuery
         if (is_array($values)) {
             $this->values += $values;
         }
+
         return $this;
     }
 
@@ -50,6 +51,7 @@ class Update extends BaseQuery
         if (is_string($column)) {
            $this->values[$column] = $value;
         }
+
         return $this;
     }
 
@@ -70,7 +72,7 @@ class Update extends BaseQuery
         $rowPlaceholder = [];
 
         foreach ($columns as $column) {
-            $rowPlaceholder[] = sprintf(" %s = :%s", $column, $column);
+            $rowPlaceholder[] = sprintf(" %s = ?", $column);
         }
 
         $sql = sprintf('UPDATE %1$s SET %2$s', $this->tableName, implode(', ', $rowPlaceholder));

@@ -2,6 +2,7 @@
 
 namespace Pullay\Database\Query;
 
+use Pullay\Database\Driver\ResultInterface;
 use Countable;
 use IteratorAggregate;
 use Pullay\Database\Connection;
@@ -13,7 +14,7 @@ use function is_string;
 use function sprintf;
 use function strtoupper;
 
-class Select extends BaseQuery implements Countable, IteratorAggregate
+class Select extends BaseQuery implements ResultInterface, Countable, IteratorAggregate
 {
     use JoinTrait;
     use WhereTrait;
@@ -209,50 +210,71 @@ class Select extends BaseQuery implements Countable, IteratorAggregate
     }
 
     /**
-     * @return array|null
+     * {@inheritdoc}
      */
     public function fetchOne()
     {
-        return $this->connection
-            ->executeQueryStatement($this)
-            ->fetchOne();
+        return $this->getResult()->fetchOne();
     }
 
     /**
-     * @return array
+     * {@inheritdoc}
      */
     public function fetchAll()
     {
-        return $this->connection
-            ->executeQueryStatement($this)
-            ->fetchAll();
+        return $this->getResult()->fetchAll();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function fetchColumn()
+    {
+        return $this->getResult()->fetchColumn();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function fetchObject($className, $constructorArgs = [])
+    {
+        return $this->getResult()->fetchObject($className, $constructorArgs = []);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function numRows()
+    {
+        return $this->getResult()->numRows();
     }
 
     /**
      * @param string $column
      * @return int
      */
-    public function count($column = '*')
+    #[\ReturnTypeWillChange]
+    public function count()
     {
         $sql = clone $this;
-        return $sql->select('COUNT($column)')->numRows();
+        return $sql->select('COUNT(*)')->numRows();
     }
 
     /**
      * @return Traversable
      */
+     #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return ArrayIterator($this->fetchAll());
     }
 
     /**
-     * @return int
+     * return ResultInterface
      */
-    protected function numRows()
+    private function getResult()
     {
         return $this->connection
-            ->executeQueryStatement($this)
-            ->numRows();
+            ->executeQueryStatement($this);
     }
 }

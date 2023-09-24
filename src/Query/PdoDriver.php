@@ -3,7 +3,6 @@
 namespace Pullay\Database\Driver;
 
 use PDO;
-use Exception;
 
 class PdoDriver implements DriverInterface
 {
@@ -83,11 +82,7 @@ class PdoDriver implements DriverInterface
     public function prepareQuery($sql, $params = [])
     {
         $statement = $this->pdo->prepare($sql);
-
-        if (!$statement || $statement->execute($params) === false) {
-            throw new Exception('Invalid SQL statement');
-        }
-
+        $statement->execute($params);
         return new PdoResult($statement);
     }
 

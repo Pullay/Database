@@ -15,7 +15,7 @@ class QueryBuilder
     protected $connection; 
 
     /**
-     * @param Connection $connection
+     * @params Connection $connection
      */
     public function __construct(Connection $connection)
     {
@@ -23,8 +23,15 @@ class QueryBuilder
     }
 
     /**
-     * @param string $tableName
-     * @return Insert
+     * @return Connection
+     */
+    public function getConnection()
+    {
+        return $this->connection;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function insert($tableName)
     {
@@ -32,9 +39,7 @@ class QueryBuilder
     }
 
     /**
-     * @param string $tableName
-     * @param array|string $columns
-     * @return Select
+     * {@inheritdoc}
      */
     public function select($tableName, $columns = '*')
     {
@@ -42,8 +47,7 @@ class QueryBuilder
     }
 
     /**
-     * @param string $tableName
-     * @return Update
+     * {@inheritdoc}
      */
     public function update($tableName)
     {
@@ -51,8 +55,7 @@ class QueryBuilder
     }
 
     /**
-     * @param string $tableName
-     * @return Delete
+     * {@inheritdoc}
      */
     public function delete($tableName)
     {
