@@ -2,7 +2,9 @@
 
 namespace Pullay\Database\Driver;
 
-interface ResultInterface
+use IteratorAggregate;
+
+interface ResultInterface extends IteratorAggregate
 {
     /**
      * @return array|null
@@ -31,4 +33,9 @@ interface ResultInterface
      * @return int
      */
     public function numRows();
+
+    /**
+     * @return int
+     */
+    public function rowCount();
 }

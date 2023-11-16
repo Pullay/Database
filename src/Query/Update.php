@@ -72,7 +72,8 @@ class Update extends BaseQuery
         $rowPlaceholder = [];
 
         foreach ($columns as $column) {
-            $rowPlaceholder[] = sprintf(" %s = ?", $column);
+            $rowPlaceholder[] = sprintf(" %s = :%s", $column, $column);
+            
         }
 
         $sql = sprintf('UPDATE %1$s SET %2$s', $this->tableName, implode(', ', $rowPlaceholder));

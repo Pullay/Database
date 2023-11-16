@@ -4,7 +4,6 @@ namespace Pullay\Database\Query;
 
 use Pullay\Database\Driver\ResultInterface;
 use Countable;
-use IteratorAggregate;
 use Pullay\Database\Connection;
 use ArrayIterator;
 use Traversable;
@@ -14,7 +13,7 @@ use function is_string;
 use function sprintf;
 use function strtoupper;
 
-class Select extends BaseQuery implements ResultInterface, Countable, IteratorAggregate
+class Select extends BaseQuery implements ResultInterface, Countable
 {
     use JoinTrait;
     use WhereTrait;
@@ -22,11 +21,6 @@ class Select extends BaseQuery implements ResultInterface, Countable, IteratorAg
 
     const SORT_ASC = 'ASC';
     const SORT_DESC = 'DESC';
-
-    /**
-     * @var bool
-     */
-    protected $isDistinct = false;
 
     /**
      * @var array
@@ -37,6 +31,11 @@ class Select extends BaseQuery implements ResultInterface, Countable, IteratorAg
      * @var array
      */
     protected $groupBy = [];
+
+    /**
+     * @var string|null
+     */
+    protected $having = null;
 
     /**
      * @var array
@@ -56,23 +55,6 @@ class Select extends BaseQuery implements ResultInterface, Countable, IteratorAg
     {
         $this->select($columns);
         parent::__construct($connection, $tableName);
-    }
-
-    /**
-     * @return self
-     */
-    public function distinct()
-    {
-        $this->isDistinct = true;
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isDistinct()
-    {
-        return $this->distinct;
     }
 
     /**
@@ -121,13 +103,37 @@ class Select extends BaseQuery implements ResultInterface, Countable, IteratorAg
     }
 
     /**
+     * @param string $condition
+     * @return self
+     */
+    public function having($condition)
+    {
+         if (is_string($condition)) {
+             $this->having = $having;
+         }
+         
+         return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getHaving()
+    {
+         return $this->having;
+    }
+
+    /**
      * @param string $expression
      * @param string $order
      * @return self
      */
     public function orderBy($expression, $sort = self::SORT_ASC): self
     {
-        $this->orderBy = [$expression, $sort];
+        if (is_string($expression) && is_string($sort)) {
+             $this->orderBy = [$expression, $sort];
+        }
+
         return $this;
     }
 
@@ -171,8 +177,7 @@ class Select extends BaseQuery implements ResultInterface, Countable, IteratorAg
     public function getSql()
     {
         $columns = (count($this->columns) > 0) ? implode(', ', $this->columns) : '*';
-        $distinct = ($this->isDistinct === true ? 'DISTINCT' : '');
-        $sql = "SELECT $distinct $columns FROM $this->tableName";
+        $sql = "SELECT $columns FROM $this->tableName";
 
         foreach ($this->join as $join) {
             list($type, $table, $on) = $join;
@@ -191,6 +196,10 @@ class Select extends BaseQuery implements ResultInterface, Countable, IteratorAg
 
         if (!empty($this->groupBy)) {
             $sql .= sprintf(' GROUP BY %1$s', implode(',', $this->groupBy));
+        }
+
+        if (!empty($this->having)) {
+            $sql .= sprintf(' HAVING %1$s', $this->having);
         }
 
         if (!empty($this->orderBy)) {
@@ -247,6 +256,14 @@ class Select extends BaseQuery implements ResultInterface, Countable, IteratorAg
     public function numRows()
     {
         return $this->getResult()->numRows();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rowCount()
+    {
+        return $this->getResult()->rowCount();
     }
 
     /**

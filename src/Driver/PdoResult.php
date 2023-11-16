@@ -3,6 +3,8 @@
 namespace Pullay\Database\Driver;
 
 use PDOStatement;
+use ArrayIterator;
+use Traversable;
 
 class PdoResult implements ResultInterface
 {
@@ -57,6 +59,23 @@ class PdoResult implements ResultInterface
      */
     public function numRows()
     {
+        return $this->rowCount();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rowCount()
+    {
         return $this->result->rowCount();
+    }
+
+    /**
+     * @return Traversable
+     */
+     #[\ReturnTypeWillChange]
+    public function getIterator()
+    {
+        return ArrayIterator($this->fetchAll());
     }
 }
